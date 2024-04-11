@@ -3,15 +3,6 @@
 
 // Write your JavaScript code.
 
-document.getElementById("Copy_Button").click(function () {
-  const target = this.getAttribute("data-clipboard-target");
-  const el = document.querySelector(target);
-  el.select();
-  document.execCommand("copy");
-  let newDiv = $("div").css({ position: "absolute", left: "100px", top: "100px" }).text("Copied to clipboard");
-  newDiv.fadeOut(5000);
-});
-
 function CheckAuth(data) {
   if (data?.token) {
     sessionStorage.setItem("Token", data.token);
@@ -41,3 +32,14 @@ function CheckAuth(data) {
     return token;
   }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("Copy_Button").click(function () {
+    const target = this.getAttribute("data-clipboard-target");
+    const el = document.querySelector(target);
+    el.select();
+    document.execCommand("copy");
+    let newDiv = $("div").css({ position: "absolute", left: "100px", top: "100px" }).text("Copied to clipboard");
+    newDiv.fadeOut(5000);
+  });
+});

@@ -1,15 +1,17 @@
-document.addEventListener("DOMContentLoaded", function () {
+const onEncryptFormSubmit = (e) => {
   document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
     const type = document.getElementById("Input_Type").value;
     if (type === "public") return this.submit();
 
     const value = document.getElementById("Input_Value").value;
-    var encrypted = CryptoJS.AES.encrypt(value, type === "private" ? document.getElementById("Input_Password").value : key).toString();
+    const encrypted = CryptoJS.AES.encrypt(value, type === "private" ? document.getElementById("Input_Password").value : key).toString();
     document.getElementById("Input_Value").value = encrypted;
     this.submit();
   });
+};
 
+const togglePasswordVisibility = () => {
   const passwordContainer = document.getElementById("Input_Password_Container");
   const confirmPasswordContainer = document.getElementById("Input_ConfirmPassword_Container");
   const passwordInput = document.getElementById("Input_Password");
@@ -30,4 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
       confirmPasswordInput.required = false;
     }
   });
+};
+
+document.addEventListener("DOMContentLoaded", function () {
+  onEncryptFormSubmit();
+  togglePasswordVisibility();
 });

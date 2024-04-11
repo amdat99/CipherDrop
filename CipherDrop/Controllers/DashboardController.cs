@@ -25,7 +25,6 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
     public IActionResult Send()
     {
-     
         return View(new SendCipher());
     }
 
@@ -33,7 +32,7 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Send(SendCipher model)
     {
-    
+
     if (!ModelState.IsValid)
     {
         return View(model);
