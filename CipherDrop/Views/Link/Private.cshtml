@@ -1,0 +1,65 @@
+@model CipherDrop.Models.Cipher
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 card mt-5">
+            <div class="card-body">
+            @if (Model.Value != "" && Model.Value != null)
+            {
+                <h2 class="display-5">Contents</h2>
+                <div class="mt-3">
+                
+                @if(Model.Reference != null)
+                {
+                    <label for="Reference">Reference:</label>
+                    <p >@Model.Reference</p>
+                }
+                
+                <label for="Value">Value:</label>
+                <textarea value="@Model.Value" rows="5" id="CipherValue" readonly class="form-control mt-2">@Model.Value</textarea></div>
+                
+                @if (Model.SelfDestruct)
+                {
+                    <div  class="alert alert-danger mt-3" role="alert"> This record will self destruct now and the URL link will no longer work. </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mt-3"
+                    >Expires: @Model.ExpiresAt</div>
+                }
+                <div class="mt-3 text-muted">Created: @Model.CreatedAt</div>
+                }
+            
+            else
+            {
+                <form asp-controller="Link" asp-action="Private" method="post">
+                    <p class="lead text-center">Enter the password to decrypt the cipher</p>
+
+                    <div class="mb-3">
+                        <label for="Input_Password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="Input_Password" name="Password" required minlength="8" maxlength="100" value="">
+                    </div>
+                        
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-block">Enter</button>
+                    </div>    
+                    <div asp-validation-summary="All" class="text-danger mt-3"></div>
+                </form>
+            }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const value = document.getElementById('CipherValue')
+            if(!value) return;
+            const decrypted = CryptoJS.AES.decrypt(value.value, '@TempData["Password"]').toString(CryptoJS.enc.Utf8);
+            value.value = decrypted;
+        });
+    </script>
+}

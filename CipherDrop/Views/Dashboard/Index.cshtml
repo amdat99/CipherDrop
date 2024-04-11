@@ -1,0 +1,97 @@
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+
+<script>
+    CheckAuth({ token: "@TempData["Token"]", email: "@TempData["Email"]", role: "@TempData["Role"]", name: "@TempData["Name"]" });
+</script>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+          <div  class="justify-content-between d-flex">
+            <h2 id="dashboard-title" class="text-center mb-4">Welcome Back</h2>
+            <div class="d-flex mr-5">
+                <a href="/Dashboard/Send">
+                    <button class="bg-dark text-white btn btn-primary" >Add Cipher</button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">     
+    <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Sent Ciphers</h5>
+                    <p class="card-subtitle">See ciphers you have sent.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Vault</h5>   
+                    <p class="card-subtitle">Access the encrypted vault.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Settings</h5>
+                    <p class="card-subtitle">This is a sample card content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <h2 class="mt-5">Recent Activity</h2>
+
+        <div class="col-md-12">
+        <div class="card mt-4">
+            <table class="text-white table table-dark rounded">
+                <thead>
+                    <tr>
+                        <th scope="col">User</th>
+                        <th scope="col">Area</th>
+                        <th scope="col">Action</th>                  
+                        <th scope="col">Date</th>
+                        <th scope="col">Type</th>                        
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.UserName</td>
+                            <td>@item.Area</td>
+                            <td>@item.Action</td>                        
+                            <td>@item.CreatedAt</td>
+                            <td>@item.Type</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+    const name = localStorage.getItem("name");
+    const role = localStorage.getItem("role");
+    if(name != null && role != null){
+        $("#dashboard-title").text("Welcome Back, " + name);
+    }
+    else{
+        window.location.href = "/Login";
+    }
+    </script>
+}

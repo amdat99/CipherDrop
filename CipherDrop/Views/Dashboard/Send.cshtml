@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Send Cipher";
+}
+
+<script >var key = CheckAuth();</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card mt-5 " >
+                <div class="card-body" >
+    
+                    @if (TempData["CipherUrl"] != null)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            <p class="lead text-center">Your link is ready. Copy the link below and send it to the recipient.</p>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" value="@TempData["CipherUrl"]" id="Input_Link" readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="Copy_Button" data-clipboard-target="#Input_Link">Copy</button>
+                                </div>
+                            <p class="text-center text-muted">
+                            @if(Model.Expiry != "never")
+                            {
+                                <span class="text-muted">This link will expire in @Model.Expiry</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">This link will never expire</span>
+                            }
+                            </p>
+                            <div class="mt-3 text-center d-flex justify-content-center">
+                                <a href="/dashboard/send" class="bg-dark text-white btn btn-primary mr-3">Send another</a>
+                                @if(Model.SaveVault)
+                                {
+                                    <a href="/vault" class="bg-dark text-white btn btn-primary">View Vault</a>
+                                }else {
+                                    <a href="/vault" class="bg-dark text-white btn btn-primary">Save to Vault</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else {
+                    <h1 class="display-5 text-center mb-4">Securely Send a Message</h1>
+                    <p class="lead text-center"> Choose a sending type and add your value below. </p>
+                    <form asp-controller="Dashboard" asp-action="Send" method="post" >
+                          <div class="mb-3">
+                                <label for="Input_Type" class="form-label">Type</label>
+                                <select class="form-select" id="Input_Type" name="Type" required value="@Model.Type" >
+                                    <option value="">Select Type</option>
+                                    <option value="public">Public URL (Unencrypted) - low security</option>
+                                    <option value="private">Private URL - high security</option>
+                                    <option value="internal">Share with Users or Teams - high security</option>
+                                    <option value="websocket">Share with user via Websocket - highest security</option>
+                                </select>
+                            </div>
+                             <div class="mb-3" style="display:none" id="Input_Password_Container">
+                                <label for="Input_Password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="Input_Password" name="Password" required minlength="8" maxlength="100" value="@Model.Password">
+                                <span >Password will be used to authenticate the link and encrypt the value.</span>
+                                @* <span asp-validation-for="Password" class="text-danger"></span>  *@
+                            </div>
+                            <div class="mb-3" style="display:none" id="Input_ConfirmPassword_Container">
+                                <label for="Input_ConfirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="Input_ConfirmPassword" name="ConfirmPassword" required minlength="8" maxlength="100" value="@Model.ConfirmPassword">
+                                @* <span asp-validation-for="ConfirmPassword" class="text-danger"></span>  *@
+                            </div>
+                            <div class="mb-3">
+                                <label for="Input_Value" class="form-label">Value</label>
+                                <textarea class="form-control" id="Input_Value" name="Value" required maxlength="3000" rows="3" value="@Model.Value"
+                                ></textarea>
+                                @* <span asp-validation-for="Email" class="text-danger"></span>  *@
+                            </div>
+                            <div class="mb-3">
+                                <label for="Input_Reference" class="form-label">Reference (Optional)</label>
+                                <input type="text" class="form-control" id="Input_Reference" name="Reference" maxlength="60" value="@Model.Reference">
+                                @* <span asp-validation-for="Email" class="text-danger"></span>  *@
+                            </div>
+
+                            <details class="mt-3">
+                                <summary>Advanced Options</summary>
+                                <div class="mb-3 mt-3">
+                                    <label for="Input_Expiry" class="form-label">Expiry</label>
+                                    <select class="form-select" id="Input_Expiry" name="Expiry" required value="@Model.Expiry">
+                                        <option value="After reading">After reading</option>
+                                        <option value="1 hour">1 Hour</option>
+                                        <option value="1 day">1 Day</option>
+                                        <option value="1 week">1 Week</option>
+                                        <option value="1 month">1 Month</option>
+                                        <option value="3 months">3 Months</option>
+                                        <option value="never">Never</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 ">
+                                    <input type="checkbox" class="form-check" id="Input_SaveVault" name="SaveVault" value="@Model.SaveVault">               
+                                    <label for="Input_SaveVault" class="form-label">Save to Vault ?</label>
+                                    <span class="text-muted">Save this message to the encrypted vault. A reference is required.</span>
+                                </div>
+
+                                <div class="mb-3 flex-row">
+                                    <input type="checkbox" class="form-check " id="Input_RecordActivity" name="RecordActivity" value="true" checked value="@Model.RecordActivity">
+                                    <label for="Input_RecordActivity" class="form-label">Record Activity</label>
+                                    <span class="text-muted ">Record this activity in the logs</span>
+                                </div>
+                            </details>
+
+
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-block w-50 mx-auto">Send</button>
+                        </div>
+                    </form>
+                    }
+                    <div asp-validation-summary="All" class="text-danger mt-3"></div> <!-- Display all model errors -->                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script src="~/js/send.js" asp-append-version="true"></script>
+}
+
+
+
