@@ -3,7 +3,7 @@
     ViewData["Title"] = "Dashboard";
 }
 
-
+<script src="~/js/auth.js" asp-append-version="true"></script>
 <script>
     CheckAuth({ token: "@TempData["Token"]", email: "@TempData["Email"]", role: "@TempData["Role"]", name: "@TempData["Name"]" });
 </script>
