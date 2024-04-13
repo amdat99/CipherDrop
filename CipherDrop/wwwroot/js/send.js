@@ -1,17 +1,9 @@
-const onEncryptFormSubmit = (e) => {
-  document.querySelector("form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const type = document.getElementById("Input_Type").value;
-    if (type === "public") return this.submit();
+document.addEventListener("DOMContentLoaded", function () {
+  togglePasswordFields();
+  encyptValue();
+});
 
-    const value = document.getElementById("Input_Value").value;
-    const encrypted = CryptoJS.AES.encrypt(value, type === "private" ? document.getElementById("Input_Password").value : key).toString();
-    document.getElementById("Input_Value").value = encrypted;
-    this.submit();
-  });
-};
-
-const togglePasswordVisibility = () => {
+const togglePasswordFields = () => {
   const passwordContainer = document.getElementById("Input_Password_Container");
   const confirmPasswordContainer = document.getElementById("Input_ConfirmPassword_Container");
   const passwordInput = document.getElementById("Input_Password");
@@ -34,7 +26,17 @@ const togglePasswordVisibility = () => {
   });
 };
 
-document.addEventListener("DOMContentLoaded", function () {
-  onEncryptFormSubmit();
-  togglePasswordVisibility();
-});
+let valueField = null;
+
+const encyptValue = () => {
+  const typeField = document.getElementById("Input_Type");
+  document.querySelector("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (typeField.value === "public") return this.submit();
+
+    if (!valueField) valueField = document.getElementById("Input_Value");
+    const encrypted = CryptoJS.AES.encrypt(valueField.value, type === "private" ? document.getElementById("Input_Password").value : key).toString();
+    valueField.value = encrypted;
+    this.submit();
+  });
+};
