@@ -2,6 +2,7 @@
     ViewData["Title"] = "Send Cipher";
 }
 
+<script src="~/js/auth.js" asp-append-version="true"></script>
 <script >var key = CheckAuth();</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -76,10 +77,7 @@
                                 <input type="text" class="form-control" id="Input_Reference" name="Reference" maxlength="60" value="@Model.Reference">
                                 @* <span asp-validation-for="Email" class="text-danger"></span>  *@
                             </div>
-
-                            <details class="mt-3">
-                                <summary>Advanced Options</summary>
-                                <div class="mb-3 mt-3">
+                           <div class="mb-3">
                                     <label for="Input_Expiry" class="form-label">Expiry</label>
                                     <select class="form-select" id="Input_Expiry" name="Expiry" required value="@Model.Expiry">
                                         <option value="After reading">After reading</option>
@@ -91,21 +89,23 @@
                                         <option value="never">Never</option>
                                     </select>
                                 </div>
-
-                                <div class="mb-3 ">
-                                    <input type="checkbox" class="form-check" id="Input_SaveVault" name="SaveVault" value="@Model.SaveVault">               
-                                    <label for="Input_SaveVault" class="form-label">Save to Vault ?</label>
-                                    <span class="text-muted">Save this message to the encrypted vault. A reference is required.</span>
+                            <details class="mt-3">
+                                <summary>Advanced Options</summary>
+                                <div class="mb-3 mt-3">
+                                    <div class="d-flex">
+                                        <input type="checkbox" class="form-check " id="Input_SaveVault" name="SaveVault" value="true" checked value="@Model.SaveVault">
+                                        <label for="Input_SaveVault" class="form-label ml-3">Save to Vault</label>
+                                    </div>
+                                    <span class="text-muted ">Save this record to your vault</span>
                                 </div>
-
-                                <div class="mb-3 flex-row">
-                                    <input type="checkbox" class="form-check " id="Input_RecordActivity" name="RecordActivity" value="true" checked value="@Model.RecordActivity">
-                                    <label for="Input_RecordActivity" class="form-label">Record Activity</label>
+                                <div class="mb-3">
+                                    <div class="d-flex">
+                                        <input type="checkbox" class="form-check " id="Input_RecordActivity" name="RecordActivity" value="true" checked value="@Model.RecordActivity">
+                                        <label for="Input_RecordActivity" class="form-label">Record Activity</label>
+                                    </div>                      
                                     <span class="text-muted ">Record this activity in the logs</span>
                                 </div>
                             </details>
-
-
                         <div class="mt-4 text-center">
                             <button type="submit" class="btn btn-primary btn-block w-50 mx-auto">Send</button>
                         </div>
