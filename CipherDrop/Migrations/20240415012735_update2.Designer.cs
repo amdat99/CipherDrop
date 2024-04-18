@@ -3,6 +3,7 @@ using System;
 using CipherDrop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CipherDrop.Migrations
 {
     [DbContext(typeof(CipherDropContext))]
-    partial class CipherDropContextModelSnapshot : ModelSnapshot
+    [Migration("20240415012735_update2")]
+    partial class update2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -101,8 +104,7 @@ namespace CipherDrop.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserId")
-                        .IsRequired()
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Value")
@@ -427,89 +429,6 @@ namespace CipherDrop.Migrations
                     b.ToTable("UserInvite");
                 });
 
-            modelBuilder.Entity("CipherDrop.Models.VaultFolder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsRoot")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Reference")
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("UserId")
-                        .IsRequired()
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("VaultFolder");
-                });
-
-            modelBuilder.Entity("CipherDrop.Models.VaultItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("FolderId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsFolder")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Reference")
-                        .HasMaxLength(60)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Type")
-                        .HasMaxLength(8)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("UserId")
-                        .IsRequired()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(20000)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FolderId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("VaultItem");
-                });
-
             modelBuilder.Entity("CipherDrop.Models.Cipher", b =>
                 {
                     b.HasOne("CipherDrop.Models.User", "User")
@@ -574,35 +493,6 @@ namespace CipherDrop.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CipherDrop.Models.VaultFolder", b =>
-                {
-                    b.HasOne("CipherDrop.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CipherDrop.Models.VaultItem", b =>
-                {
-                    b.HasOne("CipherDrop.Models.VaultFolder", "Folder")
-                        .WithMany()
-                        .HasForeignKey("FolderId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("CipherDrop.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Folder");
 
                     b.Navigation("User");
                 });

@@ -20,6 +20,7 @@ public class AdminSettings
 
     public bool RequirePasswordChange { get; set; } = false;
 
+    [MaxLength(5)]
     public string RequirePasswordChangeDays { get; set; }  = "180";
 
     public bool RequirePasswordChangeOnFirstLogin { get; set; } = false;
@@ -28,8 +29,12 @@ public class AdminSettings
 
     public bool DisplayActivity { get; set; } = true;
 
+    [MaxLength(5)]
     public string Timezone { get; set; } = "UTC";
 
+    [Required]
+    [MaxLength(90)]
+    public string ValidDescriptionTextString { get; set; } = "";
     
 
 } 

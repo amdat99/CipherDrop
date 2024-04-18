@@ -6,12 +6,16 @@ namespace CipherDrop.Utils.ActivityUtils
 {
     public static class ActivityUtils
     {
-        public static async Task<UserActivity?> AddActivityAsync(string area, object areaId, string action, string type, int userId, CipherDropContext context) 
+        public static async Task<UserActivity?> AddActivityAsync(string area, object areaId, string action, string type, Session? session, CipherDropContext context) 
         {
+            if (session == null)
+            {
+                return null;
+            }
             var activity = new UserActivity
             {
                 Area = area,
-                UserId = userId,
+                UserId = session.UserId,
                 Action = action,
                 Type = type
             };

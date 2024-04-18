@@ -1,4 +1,7 @@
+let inputType;
+
 document.addEventListener("DOMContentLoaded", function () {
+  inputType = document.getElementById("Input_Type");
   togglePasswordFields();
   encyptValue();
 });
@@ -9,7 +12,7 @@ const togglePasswordFields = () => {
   const passwordInput = document.getElementById("Input_Password");
   const confirmPasswordInput = document.getElementById("Input_ConfirmPassword");
 
-  document.querySelector("#Input_Type").addEventListener("change", function () {
+  inputType.addEventListener("change", function () {
     if (this.value == "private") {
       passwordContainer.style.display = "block";
       confirmPasswordContainer.style.display = "block";
@@ -29,10 +32,9 @@ const togglePasswordFields = () => {
 let valueField = null;
 
 const encyptValue = () => {
-  const typeField = document.getElementById("Input_Type");
   document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
-    if (typeField.value === "public") return this.submit();
+    if (inputType.value === "public") return this.submit();
 
     if (!valueField) valueField = document.getElementById("Input_Value");
     const encrypted = CryptoJS.AES.encrypt(valueField.value, type === "private" ? document.getElementById("Input_Password").value : key).toString();

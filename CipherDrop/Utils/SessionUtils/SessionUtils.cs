@@ -1,5 +1,4 @@
 
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using CipherDrop.Data;
 using CipherDrop.Models;
@@ -24,8 +23,42 @@ namespace CipherDrop.Utils.SessionUtils
             }
             else
             {
+                if(session != null)
+                {
+                    context.Session.Remove(session);
+                    await context.SaveChangesAsync();
+                }
+                
                 return null; // Session not found or expired
             }
+        }
+        public static async Task<Session?> CreateSessionAsync(User user, CipherDropContext context, HttpResponse Response)
+        {
+            // Create a new session for the user
+            string sessionId = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
+            var session = new Session
+            {
+                Id = sessionId,
+                UserId = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                Role = user.Role,
+                ExpiresAt = DateTime.UtcNow.AddHours(24)
+            };
+
+            // Add the session to the database
+            context.Session.Add(session);
+            await context.SaveChangesAsync();
+
+            Response.Cookies.Append("session", sessionId, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.Now.AddHours(24)
+            });
+
+            return session;
         }
 
         public static async Task UpdateSessionAsync(Session session, CipherDropContext context)

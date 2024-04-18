@@ -24,6 +24,10 @@ namespace CipherDrop.Data
 
         public DbSet<UserActivity> UserActivity { get; set; } = default!;
 
+        public DbSet<VaultFolder> VaultFolder { get; set; } = default!;
+
+        public DbSet<VaultItem> VaultItem { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 modelBuilder.Entity<SharedCipher>()
@@ -31,13 +35,25 @@ namespace CipherDrop.Data
                     .WithMany()
                     .HasForeignKey(sc => sc.CipherId)
                     .OnDelete(DeleteBehavior.Cascade);
+                
+                modelBuilder.Entity<Cipher>()
+                    .HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 modelBuilder.Entity<TeamUser>()
                     .HasOne(tu => tu.Team)
                     .WithMany()
                     .HasForeignKey(tu => tu.TeamId)
                     .OnDelete(DeleteBehavior.Cascade);
+                
+                modelBuilder.Entity<VaultItem>()
+                    .HasOne(vi => vi.Folder)
+                    .WithMany()
+                    .HasForeignKey(vi => vi.FolderId)
+                    .OnDelete(DeleteBehavior.Cascade);
             }
-        
+            
     }
 }

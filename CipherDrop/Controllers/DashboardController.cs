@@ -4,6 +4,7 @@ using CipherDrop.Models;
 using CipherDrop.Data;
 using CipherDrop.Utils.ActivityUtils;
 using CipherDrop.Utils.PasswordUtils;
+using CipherDrop.Utils;
 
 namespace CipherDrop.Controllers;
 
@@ -13,7 +14,9 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
     public IActionResult Index()
     {
-        return View(context.UserActivity.OrderByDescending(a => a.CreatedAt).Take(30).ToList().Join(context.User, a => a.UserId, u => u.Id, (a, u) => new { a, u }).Select(au => new UserActivityViewModel
+        return View(context.UserActivity.OrderByDescending(a => a.CreatedAt).Take(30).ToList()
+        .Join(context.User, a => a.UserId, u => u.Id, (a, u) => new { a, u })
+        .Select(au => new UserActivityViewModel
         {
             Area = au.a.Area,
             Action = au.a.Action,
@@ -30,18 +33,17 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Send(SendCipher model)
+  
+   public async Task<IActionResult> Send(SendCipher model)
     {
-
-    if (!ModelState.IsValid)
-    {
-        return View(model);
-    }
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
 
         using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            // Create a cipher and save it to the database
             var cipher = new Cipher
             {
                 Id = Guid.NewGuid().ToString() + Guid.NewGuid().ToString(),
@@ -50,7 +52,7 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
                 Reference = model.Reference,
                 ExpiresAt = model.Expiry != "After reading" ? ReturnExpiry(model.Expiry) : null,
                 SelfDestruct = model.Expiry == "After reading",
-                UserId = 1
+                UserId = (HttpContext.Items["Session"] as Session).UserId
             };
 
             if (model.Password != null)
@@ -70,25 +72,29 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
             if (model.RecordActivity)
             {
-                await ActivityUtils.AddActivityAsync("Cipher", cipher.Id, "Create", model.Type, 1, context);
+                await ActivityUtils.AddActivityAsync("Cipher", cipher.Id, "Create", model.Type, HttpContext.Items["Session"] as Session , context);
             }
 
             TempData["CipherUrl"] = GetLink(cipher.Id, model.Type);
             TempData["CipherId"] = cipher.Id;
 
             await transaction.CommitAsync();
+
             return View(model);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw;
+            // Log the exception for troubleshooting
+            Console.WriteLine($"An error occurred while saving: {ex.Message}");
+            // Throw a meaningful error message to the user
+            ModelState.AddModelError("", "An error occurred while saving. Please try again.");
+            return View(model);
         }
     }
+
     private static DateTime ReturnExpiry(string expiry)
     {
-        if(expiry == "never")
-            return DateTime.MaxValue;
 
         DateTime expiryTime = DateTime.Now;
         switch (expiry)
@@ -110,6 +116,9 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
                 break;
             case "1 year":
                 expiryTime = DateTime.Now.AddYears(1);
+                break;
+            case "Never":
+                expiryTime = DateTime.MaxValue;
                 break;
         }
 

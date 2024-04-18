@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CipherDrop.Models;
 
-public class Cipher
+public class VaultFolder
 {
-    [Required]
-    public string Id { get; set; } = "";
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Required]    
+    public int Id { get; set; }
 
     [Required]
     public int? UserId { get; set; } = 0;
@@ -13,21 +15,10 @@ public class Cipher
 
     [MaxLength(60)]
     public string? Reference { get; set; }
+    public bool IsRoot { get; set; } = false; 
 
-    [Required]
-    [MaxLength(5000)]
-    public string Value { get; set; } = "";
-
-    [MaxLength(8)]
-    public string? Type { get; set; } 
-
-    public DateTime? ExpiresAt { get; set; }
-
-    public bool SelfDestruct { get; set; }  = false;
-
-    public byte[]? Password { get; set; } 
-    public byte[]? PasswordSalt { get; set; }    
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
     public DateTime? DeletedAt { get; set; }

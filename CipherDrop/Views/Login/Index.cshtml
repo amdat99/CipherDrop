@@ -24,7 +24,7 @@
                             </div>
                              <div class="mb-3">
                                 <label for="Input_Token" class="form-label">Key</label>
-                                <input type="password" class="form-control" id="Input_Token" name="Token" required minlength="8" maxlength="100" value="@Model.Token">
+                                <input type="password" class="form-control" id="Input_Token" name="Token" required minlength="8" maxlength="100">
                             </div>
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary btn-block">Log in</button>
@@ -43,14 +43,25 @@
 </div>
 
 @section Scripts {
-    <script>
-    const isRefresh = '@TempData["Refresh"]';
-    if(isRefresh === "true") {
-        sessionStorage.clear();
-        localStorage.removeItem("email");
-        localStorage.removeItem("name");
-        localStorage.removeItem("role");
-    }
+    <script> 
+        const isRefresh = '@TempData["Refresh"]';
+        if(isRefresh === "true") {
+            sessionStorage.clear();
+            localStorage.removeItem("email");
+            localStorage.removeItem("name");
+            localStorage.removeItem("role");
+        }
+
+        document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const token = this.querySelector("#Input_Token");   
+        //set token to session storage
+        sessionStorage.setItem("Token", token.value);
+        //delete token value (for security reasons token should be kept locally)
+        token.value = "";
+        this.submit();
+    });
+
     </script>
 }
 

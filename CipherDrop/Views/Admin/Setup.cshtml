@@ -1,0 +1,61 @@
+
+@model CipherDrop.Models.SetupOptions
+
+@{
+    ViewData["Title"] = "Setup";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/js/auth.js" asp-append-version="true"></script>
+
+
+<div class="container mt-5">
+    <section class="row">
+        <div class="col-md-12">
+          <div>
+            <h2 id="dashboard-title" class="text-center mb-4">Setup Options</h2>
+        </div>
+    </section>
+
+    <section class="row row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card mt-4">
+              <form asp-controller="Admin" asp-action="Setup" method="post">
+                <div class="mb-3">
+                    <label for="Input_Key" class="form-label">Enter a custom password for encryption or click the button to generate a random key. Make sure to save this key as it will be used to login</label>
+                    <input type="text" class="form-control" id="Input_Key" name="Key" required minlength="10"  value="@Model.Key">
+                    <span asp-validation-for="Key" class="text-danger"></span>                    
+                </div>
+
+                    <input style="display:none" id="Input_EncyptionTestText" name="EncyptionTestText" value="@Model.EncyptionTestText">
+                <div class="mb-3">
+                    <button type="button" id="generate_key" class="btn btn-primary btn-block">Generate Key</button>
+                </div>   
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary btn-block">Setup</button>
+                </div>                    
+            </form>
+            </div>
+         </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        const keyInput = document.querySelector("#Input_Key");
+        document.querySelector("#generate_key").addEventListener("click", function() {
+            const key = CryptoJS.lib.WordArray.random(32);
+            console.log(key.toString(), keyInput);
+            keyInput.value = key.toString();
+        });
+
+        document.querySelector("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        //encrypt the string test to locally check if encryption key is correct later
+        const encrypted = CryptoJS.AES.encrypt("test", keyInput.value).toString();
+        document.querySelector("#Input_EncyptionTestText").value = encrypted;
+        sessionStorage.setItem("Token", keyInput.value);
+        keyInput.value = "";
+        this.submit();
+    });
+    </script>
+}

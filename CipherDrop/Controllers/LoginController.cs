@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using CipherDrop.Models;
 using CipherDrop.Data;
 using CipherDrop.Utils.PasswordUtils;
+using CipherDrop.Utils.SessionUtils;
+using CipherDrop.Utils;
 
 namespace CipherDrop.Controllers;
 
-public class LoginController(ILogger<LoginController> logger,CipherDropContext context) : Controller
+public class LoginController(ILogger<LoginController> logger,CipherDropContext context, AdminSettingsService adminSettingsService ) : Controller
 {
     public IActionResult Index()
     {
@@ -17,53 +19,44 @@ public class LoginController(ILogger<LoginController> logger,CipherDropContext c
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(UserLogin model)
     {
+
         if (ModelState.IsValid)
         {
             var user =  context.User.FirstOrDefault(u => u.Email == model.Email);
             if (user == null)
             {
-                ModelState.AddModelError("Token", "Invalid credentials"); 
-                return View(model);
+                return LoginError(model);
+            }
+            
+            //Get admin settings and redirect to setup page if not set
+            var adminSettings = await adminSettingsService.GetAdminSettings(context);
+            if (adminSettings == null)
+            {
+                return RedirectToAction("Setup", "Admin");
             }
 
             if (!PasswordUtils.VerifyPasswordHash(model.Password, user.Password, user.PasswordSalt))
             {
-                ModelState.AddModelError("Token" , "Invalid Credentials");
-                return View(model);
+                return LoginError(model);
             }
 
-            // Create a session and add cookie
-            string sessionId = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
-            var Session = new Session
-            {
-                Id = sessionId,
-                UserId = user.Id,
-                Email = user.Email,
-                Name = user.Name,
-                Role = user.Role,
-                ExpiresAt = DateTime.Now.AddHours(24)
-            };
-        
-            context.Session.Add(Session);
-            await context.SaveChangesAsync();
+           await SessionUtils.CreateSessionAsync(user, context, Response);
 
-            Response.Cookies.Append("session", sessionId, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.Now.AddHours(24)
-            });
-
-
-            TempData["Token"] = model.Token;
             TempData["Email"] = model.Email;
             TempData["Name"] = user.Name;
             TempData["Role"] = user.Role;
+            TempData["EncyptionTestText"] = adminSettings.ValidDescriptionTextString;
             return RedirectToAction("Index", "Dashboard");
         }
 
         return View(model);
+
+        IActionResult LoginError(UserLogin model)
+        {
+            ModelState.AddModelError("Password", "Invalid credentials");
+            TempData["Refresh"] = "true";
+            return View(model);
+        }
     }
 
     public IActionResult Logout()

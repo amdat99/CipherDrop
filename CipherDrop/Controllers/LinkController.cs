@@ -24,12 +24,9 @@ public IActionResult Public(string id)
         return RedirectToAction("ExpiredOrInvalid");
     }
     
-    if(cipher.SelfDestruct)
-    {
-        context.Cipher.Remove(cipher);
-        context.SaveChangesAsync();
-    }
-    // Pass the cipher to the view
+     // Delete the cipher if it is set to self-destruct
+    DeleteCipherIfSelfDestruct(cipher);
+
     return View(cipher);
 }
 
@@ -70,17 +67,21 @@ public IActionResult Private(PrivateLink model, string id)
             return View(model);
         }
     
-    if(cipher.SelfDestruct)
-    {
-        context.Cipher.Remove(cipher);
-        context.SaveChangesAsync();
-    }
+    DeleteCipherIfSelfDestruct(cipher);
 
     TempData["Password"] = model.Password;
     return View(cipher);
-    
 }
 
+   private void DeleteCipherIfSelfDestruct(Cipher cipher)
+        {
+            if (cipher.SelfDestruct)
+            {
+                context.Cipher.Remove(cipher);
+                context.SaveChangesAsync();
+            }
+        }
+    
 public IActionResult ExpiredOrInvalid() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

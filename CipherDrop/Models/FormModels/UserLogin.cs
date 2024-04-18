@@ -15,10 +15,9 @@ public class UserLogin
 
     public string Password { get; set; } = "";
 
-    [Required(ErrorMessage = "Please enter your key")]
-    public string Token { get; set; } = "";
+    public string? Token { get; set; }
 
-    public string ReturnUrl { get; set; } = "";
+    public string? ReturnUrl { get; set; } 
 
 }
 
