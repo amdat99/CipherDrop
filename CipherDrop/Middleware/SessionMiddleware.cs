@@ -17,8 +17,7 @@ namespace CipherDrop.Middleware
                 context.Request.Path.StartsWithSegments("/Vault") ||
                 context.Request.Path.StartsWithSegments("/Settings") ||
                 context.Request.Path.StartsWithSegments("/logged-api")||
-                context.Request.Path.StartsWithSegments("/Cipher") ||
-                context.Request.Path.StartsWithSegments("/Admin"))
+                context.Request.Path.StartsWithSegments("/Cipher")) 
             {
 
                 using var scope = context.RequestServices.CreateScope();

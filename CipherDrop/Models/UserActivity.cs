@@ -19,8 +19,6 @@ public class UserActivity
     public string? StringAreaId { get; set; }
 
     public int UserId { get; set; } = 0;
-    public User User { get; set; } = default!;
-
 
     [Required]
     public string Action { get; set; } = "";

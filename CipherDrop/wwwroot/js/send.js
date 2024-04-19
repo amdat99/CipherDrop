@@ -37,7 +37,7 @@ const encyptValue = () => {
     if (inputType.value === "public") return this.submit();
 
     if (!valueField) valueField = document.getElementById("Input_Value");
-    const encrypted = CryptoJS.AES.encrypt(valueField.value, type === "private" ? document.getElementById("Input_Password").value : key).toString();
+    const encrypted = CryptoJS.AES.encrypt(valueField.value, inputType.value === "private" ? document.getElementById("Input_Password").value : key).toString();
     valueField.value = encrypted;
     this.submit();
   });
