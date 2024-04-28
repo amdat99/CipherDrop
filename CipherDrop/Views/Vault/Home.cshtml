@@ -1,0 +1,65 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewData["Title"] = "Vault";
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/js/auth.js" asp-append-version="true"></script>
+<script src="~/js/utils.js" asp-append-version="true"></script>
+<script>
+    CheckAuth();
+</script>
+
+<link rel="stylesheet" href="~/css/vault.css" asp-append-version="true" />
+<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Left Sidebar for Folders -->
+            <div class="card folder-view">
+                <div class="d-flex justify-content-between align-items-center p-3">
+                    <h5 class="card-title">Folders</h5>
+                    <button type="button" class="btn btn-primary btn-sm bg-dark text-white" id="addRootFolder">
+                        <i class="bi bi-folder-plus"></i> Add Folder
+                    </button>
+                </div>
+                <div class="vault-folder-list p-3">
+                    @foreach (var folder in Model)
+                    {
+                        <div id="root-file-@folder.Id" class="vault-root-folder">@folder.Reference</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <!-- Middle Content for Files -->
+            <div class="card file-view">
+                <div class="card-header d-flex justify-content-between align-items-center p-3">
+                    <div id="file-path">Files</div>
+                    <button type="button" class="btn btn-primary btn-sm bg-dark text-white" id="vault-add-file" style="display:none">
+                        <i class="bi bi-file-earmark-plus"></i> Add File
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="vault-file-list"></div>
+                    <div id="file-viewer" class="file-viewer" style="display:none">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="text" id="file-viewer-reference" class="form-control border-0 bg-transparent" placeholder="File Name" style="color: white">
+                        </div>
+                        <textarea id="file-viewer-content" class="form-control mt-3" rows="10" placeholder="File Content"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="RequestVerificationToken" name="RequestVerificationToken" value='@Html.AntiForgeryToken()'>
+</div>
+
+@section Scripts {    
+    <script src="~/js/vault/vaultVars.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
+        <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vault.js" asp-append-version="true"></script>
+}

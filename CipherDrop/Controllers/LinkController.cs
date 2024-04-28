@@ -60,7 +60,6 @@ public IActionResult Private(PrivateLink model, string id)
         return RedirectToAction("ExpiredOrInvalid");
     }
     
-
     if (!PasswordUtils.VerifyPasswordHash(model.Password, cipher.Password, cipher.PasswordSalt))
         {
             ModelState.AddModelError("Password" , "Invalid Password");

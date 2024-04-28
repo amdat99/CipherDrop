@@ -5,16 +5,16 @@
 namespace CipherDrop.Migrations
 {
     /// <inheritdoc />
-    public partial class update2 : Migration
+    public partial class adminsettings3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "ValidDescriptionTextString",
+                name: "KeyEnd",
                 table: "AdminSettings",
                 type: "TEXT",
-                maxLength: 90,
+                maxLength: 16,
                 nullable: false,
                 defaultValue: "");
         }
@@ -23,7 +23,7 @@ namespace CipherDrop.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ValidDescriptionTextString",
+                name: "KeyEnd",
                 table: "AdminSettings");
         }
     }

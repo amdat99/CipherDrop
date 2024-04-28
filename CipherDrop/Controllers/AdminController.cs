@@ -35,7 +35,8 @@ public class AdminController(ILogger<DashboardController> logger,CipherDropConte
 
             var adminSettings = new AdminSettings
             {
-                ValidDescriptionTextString = model.EncyptionTestText
+                EncyptionTestText = model.EncyptionTestText,
+                KeyEnd  = model.KeyEnd
             };
 
             context.AdminSettings.Add(adminSettings);

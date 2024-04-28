@@ -16,7 +16,7 @@ namespace CipherDrop.Middleware
             if (context.Request.Path.StartsWithSegments("/Dashboard") ||
                 context.Request.Path.StartsWithSegments("/Vault") ||
                 context.Request.Path.StartsWithSegments("/Settings") ||
-                context.Request.Path.StartsWithSegments("/logged-api")||
+                context.Request.Path.StartsWithSegments("/Loggedapi")||
                 context.Request.Path.StartsWithSegments("/Cipher")) 
             {
 

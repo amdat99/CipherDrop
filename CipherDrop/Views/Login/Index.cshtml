@@ -7,7 +7,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-6">
-            <div class="card mt-5">
+            <div class="card mt-5 p-3">
                 <div class="card-body">
                     <h1 class="display-5 text-center mb-4">Login</h1>
                     <p class="lead text-center">Use your credentials to log in.</p>
@@ -21,10 +21,6 @@
                                 <label for="Input_Password" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="Input_Password" name="Password" required minlength="8" maxlength="100" value="@Model.Password">
                                 <span asp-validation-for="Password" class="text-danger"></span> 
-                            </div>
-                             <div class="mb-3">
-                                <label for="Input_Token" class="form-label">Key</label>
-                                <input type="password" class="form-control" id="Input_Token" name="Token" required minlength="8" maxlength="100">
                             </div>
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary btn-block">Log in</button>
@@ -51,17 +47,6 @@
             localStorage.removeItem("name");
             localStorage.removeItem("role");
         }
-
-        document.querySelector("form").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const token = this.querySelector("#Input_Token");   
-        //set token to session storage
-        sessionStorage.setItem("Token", token.value);
-        //delete token value (for security reasons token should be kept locally)
-        token.value = "";
-        this.submit();
-    });
-
     </script>
 }
 

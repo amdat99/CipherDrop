@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CipherDrop.Migrations
 {
     [DbContext(typeof(CipherDropContext))]
-    [Migration("20240415012735_update2")]
-    partial class update2
+    [Migration("20240421174151_Adminsettings2")]
+    partial class Adminsettings2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,11 @@ namespace CipherDrop.Migrations
 
                     b.Property<bool>("DisplayActivity")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("EncyptionTestText")
+                        .IsRequired()
+                        .HasMaxLength(90)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("InviteOnly")
                         .HasColumnType("INTEGER");
@@ -58,11 +63,6 @@ namespace CipherDrop.Migrations
                     b.Property<string>("Timezone")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ValidDescriptionTextString")
-                        .IsRequired()
-                        .HasMaxLength(90)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -104,7 +104,8 @@ namespace CipherDrop.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
+                        .IsRequired()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Value")
@@ -386,8 +387,6 @@ namespace CipherDrop.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("UserActivity");
                 });
 
@@ -427,6 +426,89 @@ namespace CipherDrop.Migrations
                     b.HasIndex("Email");
 
                     b.ToTable("UserInvite");
+                });
+
+            modelBuilder.Entity("CipherDrop.Models.VaultFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsRoot")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("VaultFolder");
+                });
+
+            modelBuilder.Entity("CipherDrop.Models.VaultItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("FolderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsFolder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(60)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .IsRequired()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(20000)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("VaultItem");
                 });
 
             modelBuilder.Entity("CipherDrop.Models.Cipher", b =>
@@ -486,13 +568,31 @@ namespace CipherDrop.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CipherDrop.Models.UserActivity", b =>
+            modelBuilder.Entity("CipherDrop.Models.VaultFolder", b =>
                 {
                     b.HasOne("CipherDrop.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CipherDrop.Models.VaultItem", b =>
+                {
+                    b.HasOne("CipherDrop.Models.VaultFolder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("CipherDrop.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
 
                     b.Navigation("User");
                 });

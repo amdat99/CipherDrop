@@ -5,6 +5,11 @@ using CipherDrop.Data;
 using CipherDrop.Middleware;
 using CipherDrop.Utils;
 
+DotNetEnv.Env.Load();
+
+Console.WriteLine("Starting CipherDrop");
+Console.WriteLine("Environment: " + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<CipherDropContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("CipherDropContext") ?? throw new InvalidOperationException("Connection string 'CipherDropContext' not found.")));

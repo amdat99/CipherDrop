@@ -19,5 +19,7 @@ public class UserLogin
 
     public string? ReturnUrl { get; set; } 
 
+    public string? QrCode { get; set; }
+
 }
 

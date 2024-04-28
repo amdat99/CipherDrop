@@ -18,7 +18,7 @@
 
     <section class="row row justify-content-center">
         <div class="col-lg-6">
-            <div class="card mt-4">
+            <div class="card mt-4 p-3">
               <form asp-controller="Admin" asp-action="Setup" method="post">
                 <div class="mb-3">
                     <label for="Input_Key" class="form-label">Enter a custom password for encryption or click the button to generate a random key. Make sure to save this key as it will be used to login</label>
@@ -26,7 +26,8 @@
                     <span asp-validation-for="Key" class="text-danger"></span>                    
                 </div>
 
-                    <input style="display:none" id="Input_EncyptionTestText" name="EncyptionTestText" value="@Model.EncyptionTestText">
+                <input style="display:none" id="Input_EncyptionTestText" name="EncyptionTestText" value="@Model.EncyptionTestText" type="hidden">
+                <input style="display:none" id="Input_KeyEnd" name="KeyEnd" value="@Model.KeyEnd" type="hidden">
                 <div class="mb-3">
                     <button type="button" id="generate_key" class="btn btn-primary btn-block">Generate Key</button>
                 </div>   
@@ -44,15 +45,18 @@
         const keyInput = document.querySelector("#Input_Key");
         document.querySelector("#generate_key").addEventListener("click", function() {
             const key = CryptoJS.lib.WordArray.random(32);
-            console.log(key.toString(), keyInput);
             keyInput.value = key.toString();
         });
 
         document.querySelector("form").addEventListener("submit", function (e) {
         e.preventDefault();
+        //Create a random 12 character string for key ending
+        const keyEnding = CryptoJS.lib.WordArray.random(12).toString();
         //encrypt the string test to locally check if encryption key is correct later
-        const encrypted = CryptoJS.AES.encrypt("test", keyInput.value).toString();
+        const encrypted = CryptoJS.AES.encrypt("test", keyInput.value + keyEnding).toString();
         document.querySelector("#Input_EncyptionTestText").value = encrypted;
+        document.querySelector("#Input_KeyEnd").value = keyEnding;
+
         sessionStorage.setItem("Token", keyInput.value);
         keyInput.value = "";
         this.submit();

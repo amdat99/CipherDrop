@@ -4,7 +4,6 @@ using CipherDrop.Models;
 using CipherDrop.Data;
 using CipherDrop.Utils.ActivityUtils;
 using CipherDrop.Utils.PasswordUtils;
-using CipherDrop.Utils;
 
 namespace CipherDrop.Controllers;
 
@@ -124,7 +123,6 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
         return expiryTime;
     }
-
     private string GetLink(string cipherId, string cipherType)
     {
         if(cipherType == "public")
@@ -137,7 +135,6 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
             return "";
     }
 
-  
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

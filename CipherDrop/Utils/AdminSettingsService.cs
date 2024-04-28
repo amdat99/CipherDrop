@@ -12,7 +12,7 @@ namespace CipherDrop.Utils
         public async Task<AdminSettings?> GetAdminSettings(CipherDropContext context)
         {
             //Check if the admin settings have been set
-            if (_adminSettings.ValidDescriptionTextString == "" )
+            if (_adminSettings.EncyptionTestText == null)
             {
                var adminSettingsQuery = await context.AdminSettings.FirstOrDefaultAsync();
                if (adminSettingsQuery == null)

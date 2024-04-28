@@ -1,0 +1,60 @@
+#file-viewer-content {
+  height: 55vh;
+  color: #fff !important;
+  border-color: transparent !important;
+  background-color: #343a40 !important;
+}
+
+#file-viewer-reference {
+  color: #fff !important;
+  border-color: transparent !important;
+  background-color: #343a40 !important;
+}
+.file-view {
+  min-height: calc(100vh - 180px) !important;
+  max-height: calc(100vh - 180px) !important;
+  overflow: auto;
+}
+
+.folder-view {
+  min-height: calc(100vh - 180px) !important;
+  max-height: calc(100vh - 180px) !important;
+  overflow: auto;
+}
+.vault-folder-list {
+  overflow-y: auto;
+}
+
+.vault-root-folder {
+  padding: 5px;
+  margin-bottom: 1px;
+  border-radius: 5px;
+  background-color: #212529;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.3s;
+  border: 1px solid transparent;
+}
+
+.vault-root-folder:hover {
+  background-color: #343a40;
+  transition: background-color 0.3s;
+}
+
+.vault-item {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-radius: 5px;
+  background-color: #212529;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.3s;
+  border: 1px solid #343a40;
+}
+
+.vault-item:hover {
+  background-color: #343a40;
+  transition: background-color 0.3s;
+}

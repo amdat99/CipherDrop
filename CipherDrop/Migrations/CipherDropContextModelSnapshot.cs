@@ -29,8 +29,18 @@ namespace CipherDrop.Migrations
                     b.Property<bool>("DisplayActivity")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("EncyptionTestText")
+                        .IsRequired()
+                        .HasMaxLength(90)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("InviteOnly")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("KeyEnd")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("PublicRegistration")
                         .HasColumnType("INTEGER");
@@ -55,11 +65,6 @@ namespace CipherDrop.Migrations
                     b.Property<string>("Timezone")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ValidDescriptionTextString")
-                        .IsRequired()
-                        .HasMaxLength(90)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -384,8 +389,6 @@ namespace CipherDrop.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("UserActivity");
                 });
 
@@ -563,17 +566,6 @@ namespace CipherDrop.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CipherDrop.Models.UserActivity", b =>
-                {
-                    b.HasOne("CipherDrop.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

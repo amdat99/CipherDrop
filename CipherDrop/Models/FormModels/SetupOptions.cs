@@ -24,6 +24,8 @@ public class SetupOptions
 
     public string EncyptionTestText { get; set; } = "";
 
+    public string KeyEnd { get; set; } = "";
+
 
 }
 

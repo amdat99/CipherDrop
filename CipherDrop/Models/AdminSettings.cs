@@ -34,8 +34,13 @@ public class AdminSettings
 
     [Required]
     [MaxLength(90)]
-    public string ValidDescriptionTextString { get; set; } = "";
-    
+    public string? EncyptionTestText { get; set; }
 
+    [Required]
+
+    [MaxLength(16)]
+
+    public string? KeyEnd { get; set; }
+    
 } 
 

@@ -9,7 +9,7 @@ public class UserActivity
     [Required]
     public int Id { get; set; } 
 
-    [Required]
+    [Required]  
     [MaxLength(15)]
     public string Area { get; set; } = "";
 

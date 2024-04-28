@@ -62,7 +62,12 @@ namespace CipherDrop.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("Error", ex.Message);
+                    //Check if the error is due to the email already existing
+                    if (ex.Message.Contains("Email already exists"))
+                    {
+                        ModelState.AddModelError("Email", "Email already exists");
+                    }
+                    ModelState.AddModelError("Error", "An error occurred while processing your request");
                 }
             }
 

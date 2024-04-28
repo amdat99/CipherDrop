@@ -8,7 +8,7 @@ using CipherDrop.Utils;
 
 namespace CipherDrop.Controllers;
 
-public class LoginController(ILogger<LoginController> logger,CipherDropContext context, AdminSettingsService adminSettingsService ) : Controller
+public class LoginController(CipherDropContext context, AdminSettingsService adminSettingsService ) : Controller
 {
     public IActionResult Index()
     {
@@ -45,7 +45,6 @@ public class LoginController(ILogger<LoginController> logger,CipherDropContext c
             TempData["Email"] = model.Email;
             TempData["Name"] = user.Name;
             TempData["Role"] = user.Role;
-            TempData["EncyptionTestText"] = adminSettings.ValidDescriptionTextString;
             return RedirectToAction("Index", "Dashboard");
         }
 
