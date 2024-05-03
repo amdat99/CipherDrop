@@ -10,19 +10,16 @@ namespace CipherDrop.Controllers;
 public class DashboardController(ILogger<DashboardController> logger,CipherDropContext context) : Controller
 {
     private readonly ILogger<DashboardController> _logger = logger;
-
+    
     public IActionResult Index()
     {
-        return View(context.UserActivity.OrderByDescending(a => a.CreatedAt).Take(30).ToList()
-        .Join(context.User, a => a.UserId, u => u.Id, (a, u) => new { a, u })
-        .Select(au => new UserActivityViewModel
-        {
-            Area = au.a.Area,
-            Action = au.a.Action,
-            Type = au.a.Type,
-            CreatedAt = au.a.CreatedAt,
-            UserName = au.u.Name
-        }).ToList());               
+    return View(context.UserActivity.OrderByDescending(a => a.CreatedAt)
+                    .Take(30)
+                    .ToList()
+                    .Join(context.User, a => a.UserId, u => u.Id, (a, u) => new { a, u })
+                    .Select(au => new UserActivityViewModel{ Area = au.a.Area, Action = au.a.Action, Type = au.a.Type,
+                                CreatedAt = au.a.CreatedAt, UserName = au.u.Name })
+                    .ToList());
     }
 
     public IActionResult Send()
@@ -30,9 +27,9 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
         return View(new SendCipher());
     }
 
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-  
    public async Task<IActionResult> Send(SendCipher model)
     {
         if (!ModelState.IsValid)
@@ -123,6 +120,7 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
 
         return expiryTime;
     }
+    
     private string GetLink(string cipherId, string cipherType)
     {
         if(cipherType == "public")
@@ -136,6 +134,7 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

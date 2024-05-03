@@ -12,12 +12,10 @@ public class UserActivity
     [Required]  
     [MaxLength(15)]
     public string Area { get; set; } = "";
-
     public int? AreaId { get; set; } 
 
     [MaxLength(90)]
     public string? StringAreaId { get; set; }
-
     public int UserId { get; set; } = 0;
 
     [Required]

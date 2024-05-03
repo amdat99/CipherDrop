@@ -2,52 +2,11 @@ let currentFolder = null;
 let isFolder = true;
 let lastId = 0;
 
-document.addEventListener("DOMContentLoaded", function () {
-  onRootFolderClick();
-  // checkQueryForFolder();
-});
-
-const checkQueryForFolder = async () => {
-  const url = new URL(window.location.href);
-  const lastParam = url.pathname.split("/").pop();
-  if (lastParam === "home") return;
-  const folderId = lastParam;
-
-  const folder = await fetchFolderItems(folderId);
-  if (!folder) return;
-  isFolder = folder[0].isFolder;
-
-  setItems(folderId);
-};
-
-const addItem = async (folderId) => {
-  $("#addItemBtn").on("click", async function (e) {
-    const fileReference = document.getElementById("fileReference").value;
-    let value = document.getElementById("value").value;
-    if (!fileReference || !value) return;
-    //encrypt value
-    const token = sessionStorage.getItem("Token");
-    const adminsettings = await FetchAdminSettings();
-    if (!token || !adminsettings) return;
-    value = CryptoJS.AES.encrypt(value, token + adminsettings.keyEnd).toString();
-    isFolder = false;
-
-    const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: fileReference, value, isFolder } });
-    if (request.success) {
-      CloseModal();
-      VaultFileList.append(
-        `<div id="root-file-${request.id}" class="vault-item p-3"><span>${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
-      );
-    } else {
-      alert("An error occured");
-    }
-  });
-};
-
-const onRootFolderClick = () => {
+const OnRootFolderClick = () => {
   $(".vault-root-folder").on("click", async function (e) {
     const folderId = this.id.split("-")[2];
     showListViwer();
+    //Check if the folder is already selected if not set items for the folder
     if (window?.currentFolderId === folderId) return;
     window.currentFolderId = folderId;
 
@@ -56,20 +15,24 @@ const onRootFolderClick = () => {
     this.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
     currentFolder = e.target;
 
+    //Set fiolder path and and add listener to folder name in path
     $("#file-path").html(`<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${this.innerText}</a>`);
 
+    $(".file-path-item").off("click");
     $(".file-path-item").on("click", function (e) {
       e.preventDefault();
       const folderId = this.id.split("-")[2];
       showListViwer();
+
+      //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
       if (window.currentFolderId === folderId) return;
-      setItems(folderId);
+      setItems(folderId, true);
     });
 
-    //Set items
+    //Detch folder items and render them if any
     setItems(folderId);
 
-    //Add event listener to add item button and show it
+    //Add event listener to add item button and show the button
     DisplayAddItemBtnWithModal(folderId);
 
     //Add id to url
@@ -77,12 +40,10 @@ const onRootFolderClick = () => {
   });
 };
 
-const showListViwer = () => {
-  VaultFileViewer.hide();
-  VaultFileList.show();
-};
+//Run the function on load
+OnRootFolderClick();
 
-const setItems = async (folderId) => {
+const setItems = async (folderId, removeItemEListener = false) => {
   const items = await fetchFolderItems(folderId);
   if (!items) return;
 
@@ -94,7 +55,7 @@ const setItems = async (folderId) => {
     );
   });
 
-  OnItemClick();
+  OnItemClick(removeItemEListener);
 };
 
 const DisplayAddItemBtnWithModal = (folderId) => {
@@ -102,8 +63,8 @@ const DisplayAddItemBtnWithModal = (folderId) => {
   addItemBtn.show();
   addItemBtn.off("click");
   addItemBtn.on("click", function () {
-    DisplayModal(
-      `
+    DisplayModal({
+      content: `
       <div class="mb-3">
         <label for="fileReference" class="form-label">Reference</label>
         <input type="text" class="form-control" id="fileReference" name="fileReference" required>
@@ -112,15 +73,11 @@ const DisplayAddItemBtnWithModal = (folderId) => {
         <label for="value" class="form-label">Value</label>
         <textarea class="form-control" id="value" name="value" required></textarea>
       </div>
-      <div class="d-grid mt-4">
-        <button type="button" id="addItemBtn" class="btn btn-primary btn-block">Add Item</button>
-      </div>
       `,
-      "90vw"
-    );
-    setTimeout(() => {
-      addItem(folderId);
-    }, 0);
+      buttonText: "Add Item",
+      submitFunction: () => AddItem(folderId),
+      minWidth: "90vw",
+    });
   });
 };
 
@@ -136,4 +93,22 @@ const fetchFolderItems = async (folderId, reset = true) => {
     console.log(error);
     return null;
   }
+};
+
+const checkQueryForFolder = async () => {
+  const url = new URL(window.location.href);
+  const lastParam = url.pathname.split("/").pop();
+  if (lastParam === "home") return;
+  const folderId = lastParam;
+
+  const folder = await fetchFolderItems(folderId);
+  if (!folder) return;
+  isFolder = folder[0].isFolder;
+
+  setItems(folderId);
+};
+
+const showListViwer = () => {
+  VaultFileViewer.hide();
+  VaultFileList.show();
 };

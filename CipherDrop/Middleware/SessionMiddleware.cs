@@ -61,7 +61,6 @@ namespace CipherDrop.Middleware
                 context.Items["Session"] = session ?? new Session();
                 context.Items["AdminSettings"] = adminSettings ?? new AdminSettings();
             }
-
             await _next(context);
         }
     }

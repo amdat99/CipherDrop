@@ -16,7 +16,6 @@ public class UserRegister
 
     [Required(ErrorMessage = "Please enter your password")]
     [StringLength(100, MinimumLength = 8, ErrorMessage = "Password should be between 8 and 100 characters")]
-
     public string Password { get; set; } = "";
 
     [Required(ErrorMessage = "Please confirm your password")]

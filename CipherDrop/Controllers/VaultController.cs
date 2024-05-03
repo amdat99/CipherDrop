@@ -17,13 +17,31 @@ public class VaultController(CipherDropContext context) : Controller
     public IActionResult VaultItems(int id)
     {
         string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
-        var vaultItems = context.VaultItem.Where(vf => vf.FolderId == id  && vf.Id > int.Parse(lastId)).Select(vf => new { vf.Id, vf.Reference, vf.IsFolder , vf.UserId, vf.UpdatedAt }).ToList();
+        // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId)
+         var vaultItems = context.VaultItem
+                         .Where(vf => vf.FolderId == id && vf.Id > int.Parse(lastId)
+                                 && (vf.IsViewRestricted == false
+                                     || (vf.IsViewRestricted == true
+                                         && context.SharedVaultItemView.Any(sv => sv.VaultItemId == vf.Id
+                                                 && sv.UserId == (HttpContext.Items["Session"] as Session).UserId))))
+                         .OrderByDescending(vf => vf.UpdatedAt)
+                         .Take(50)
+                         .Select(vf => new { vf.Id, vf.Reference, vf.IsFolder, vf.UserId, vf.UpdatedAt })
+                         .ToList();
+        
         return Json( new { success = true, data = vaultItems });
     }
 
     public IActionResult VaultItem(int id)
     {
-        var vaultItem = context.VaultItem.FirstOrDefault(vf => vf.Id == id);
+        // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId)
+         var vaultItem = context.VaultItem
+                        .Where(vf => vf.Id == id
+                                && (vf.IsViewRestricted == false
+                                    || (vf.IsViewRestricted == true
+                                        && context.SharedVaultItemView.Any(sv => sv.VaultItemId == vf.Id
+                                                && sv.UserId == (HttpContext.Items["Session"] as Session).UserId))))
+                        .FirstOrDefault();
         
         if (vaultItem == null) return Json(new { success = false, message = "VaultItem not found" });
         
@@ -117,7 +135,6 @@ public class VaultController(CipherDropContext context) : Controller
             return Json(new { success = false, message = "Error updating item" });
         }
     }
-
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

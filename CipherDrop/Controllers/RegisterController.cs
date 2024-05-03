@@ -6,9 +6,8 @@ using CipherDrop.Utils.PasswordUtils;
 using CipherDrop.Utils;
 using CipherDrop.Utils.SessionUtils;
 
-namespace CipherDrop.Controllers
+namespace CipherDrop.Controllers;
 
-{
     public class RegisterController(CipherDropContext context,AdminSettingsService adminSettingsService) : Controller
     {
         public IActionResult Index()
@@ -80,4 +79,4 @@ namespace CipherDrop.Controllers
             }
         }
     }
-}
+

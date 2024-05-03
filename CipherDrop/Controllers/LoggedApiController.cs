@@ -6,7 +6,6 @@ namespace CipherDrop.Controllers;
 
 public class LoggedApiController() : Controller
 {
-
     [HttpGet]
     public IActionResult AdminSettings ()
     {

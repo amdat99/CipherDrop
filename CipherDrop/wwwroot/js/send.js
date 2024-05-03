@@ -1,12 +1,7 @@
-let inputType;
+let inputType = document.getElementById("Input_Type");
 
-document.addEventListener("DOMContentLoaded", function () {
-  inputType = document.getElementById("Input_Type");
-  togglePasswordFields();
-  encyptValue();
-});
-
-const togglePasswordFields = () => {
+//Toggle password fields
+(() => {
   const passwordContainer = document.getElementById("Input_Password_Container");
   const confirmPasswordContainer = document.getElementById("Input_ConfirmPassword_Container");
   const passwordInput = document.getElementById("Input_Password");
@@ -27,11 +22,12 @@ const togglePasswordFields = () => {
       confirmPasswordInput.required = false;
     }
   });
-};
+})();
 
 let valueField = null;
 
-const encyptValue = () => {
+//Encrypt value before sending if not public type
+(() => {
   document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
     if (inputType.value === "public") return this.submit();
@@ -44,4 +40,4 @@ const encyptValue = () => {
     valueField.value = encrypted;
     this.submit();
   });
-};
+})();

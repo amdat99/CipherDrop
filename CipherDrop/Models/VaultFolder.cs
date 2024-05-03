@@ -17,10 +17,13 @@ public class VaultFolder
     public string? Reference { get; set; }
     public bool IsRoot { get; set; } = false; 
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    //Below restricted fields should be updated by setttings set in AdminSettings before creating the item
 
+    public bool IsViewRestricted { get; set; } = false;
+    public bool IsEditRestricted { get; set; } = false;
+    public bool IsDeleteRestricted { get; set; } = true;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
     public DateTime? DeletedAt { get; set; }
 }
 

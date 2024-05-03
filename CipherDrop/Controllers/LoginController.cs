@@ -19,7 +19,6 @@ public class LoginController(CipherDropContext context, AdminSettingsService adm
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(UserLogin model)
     {
-
         if (ModelState.IsValid)
         {
             var user =  context.User.FirstOrDefault(u => u.Email == model.Email);
@@ -27,14 +26,12 @@ public class LoginController(CipherDropContext context, AdminSettingsService adm
             {
                 return LoginError(model);
             }
-            
             //Get admin settings and redirect to setup page if not set
             var adminSettings = await adminSettingsService.GetAdminSettings(context);
             if (adminSettings == null)
             {
                 return RedirectToAction("Setup", "Admin");
             }
-
             if (!PasswordUtils.VerifyPasswordHash(model.Password, user.Password, user.PasswordSalt))
             {
                 return LoginError(model);
@@ -71,5 +68,4 @@ public class LoginController(CipherDropContext context, AdminSettingsService adm
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
-
 }

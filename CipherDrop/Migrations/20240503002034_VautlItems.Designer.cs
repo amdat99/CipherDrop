@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CipherDrop.Migrations
 {
     [DbContext(typeof(CipherDropContext))]
-    [Migration("20240421174151_Adminsettings2")]
-    partial class Adminsettings2
+    [Migration("20240503002034_VautlItems")]
+    partial class VautlItems
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,8 +40,28 @@ namespace CipherDrop.Migrations
                     b.Property<bool>("InviteOnly")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("PublicRegistration")
+                    b.Property<bool>("IsDefaltVaultFolderDeleteRestricted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDefaltVaultFolderEditRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDefaltVaultFolderViewRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDefaltVaultItemDeleteRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDefaltVaultItemEditRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDefaltVaultItemViewRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KeyEnd")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("Require2FA")
                         .HasColumnType("INTEGER");
@@ -215,9 +235,6 @@ namespace CipherDrop.Migrations
                     b.Property<int>("TeamId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
@@ -230,6 +247,35 @@ namespace CipherDrop.Migrations
                     b.HasIndex("CipherId", "TeamId");
 
                     b.ToTable("SharedCipher");
+                });
+
+            modelBuilder.Entity("CipherDrop.Models.SharedVaultItemView", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("VaultItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VaultItemId", "UserId");
+
+                    b.ToTable("SharedVaultItemView");
                 });
 
             modelBuilder.Entity("CipherDrop.Models.Team", b =>
@@ -440,7 +486,16 @@ namespace CipherDrop.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleteRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsEditRestricted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsRoot")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsViewRestricted")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Reference")
@@ -479,7 +534,16 @@ namespace CipherDrop.Migrations
                     b.Property<int?>("FolderId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsDeleteRestricted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsEditRestricted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsFolder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsViewRestricted")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Reference")
@@ -547,6 +611,33 @@ namespace CipherDrop.Migrations
                     b.Navigation("Team");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CipherDrop.Models.SharedVaultItemView", b =>
+                {
+                    b.HasOne("CipherDrop.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CipherDrop.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CipherDrop.Models.VaultItem", "VaultItem")
+                        .WithMany()
+                        .HasForeignKey("VaultItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
+
+                    b.Navigation("VaultItem");
                 });
 
             modelBuilder.Entity("CipherDrop.Models.TeamUser", b =>

@@ -1,10 +1,13 @@
-﻿@{
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
 
     bool isLoggedIn = false;
     if (Context.Request.Cookies.TryGetValue("session", out string value))
     {
         isLoggedIn = true;
     }
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <!DOCTYPE html>
@@ -15,9 +18,13 @@
     <title>@ViewData["Title"] - CipherDrop</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/utils.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="~/CipherDrop.styles.css" asp-append-version="true" />    
 </head>
 <body>
+
+
+<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark  mb-3">
             <div class="container">

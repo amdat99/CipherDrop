@@ -1,18 +1,14 @@
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     ViewData["Title"] = "Vault";
-    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="~/js/auth.js" asp-append-version="true"></script>
-<script src="~/js/utils.js" asp-append-version="true"></script>
 <script>
     CheckAuth();
 </script>
 
 <link rel="stylesheet" href="~/css/vault.css" asp-append-version="true" />
-<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
 
 <div class="container mt-5">
     <div class="row">
@@ -28,7 +24,7 @@
                 <div class="vault-folder-list p-3">
                     @foreach (var folder in Model)
                     {
-                        <div id="root-file-@folder.Id" class="vault-root-folder">@folder.Reference</div>
+                        <div id="root-folder-@folder.Id" class="vault-root-folder">@folder.Reference</div>
                     }
                 </div>
             </div>
@@ -60,6 +56,6 @@
 @section Scripts {    
     <script src="~/js/vault/vaultVars.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vault.js" asp-append-version="true"></script>    
     <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
-    <script src="~/js/vault/vault.js" asp-append-version="true"></script>
 }

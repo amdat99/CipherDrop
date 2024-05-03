@@ -50,13 +50,11 @@
 
 @section Scripts {
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
             const value = document.getElementById('CipherValue')
             if(!value) return;
             const decrypted = CryptoJS.AES.decrypt(value.value, '@TempData["Password"]').toString(CryptoJS.enc.Utf8);
             value.value = decrypted;
             value.style.display = 'block';
             document.querySelector('.loader').style.display = 'none';
-        });
     </script>
 }

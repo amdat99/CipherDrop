@@ -32,6 +32,7 @@ namespace CipherDrop.Utils.SessionUtils
                 return null; // Session not found or expired
             }
         }
+        
         public static async Task<Session?> CreateSessionAsync(User user, CipherDropContext context, HttpResponse Response)
         {
             // Create a new session for the user
@@ -96,7 +97,5 @@ namespace CipherDrop.Utils.SessionUtils
             var session = await GetSessionAsync(token, context);
             return session != null && session.Role == "Admin";
         }
-
-    
     }
 }

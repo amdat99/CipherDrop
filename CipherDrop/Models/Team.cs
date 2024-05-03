@@ -8,7 +8,6 @@ namespace CipherDrop.Models;
 [Index(nameof(Name), IsUnique = true)]
 public class Team
 {
-
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Required]
     public int Id { get; set; } 

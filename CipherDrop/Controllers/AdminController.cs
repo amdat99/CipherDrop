@@ -45,6 +45,7 @@ public class AdminController(ILogger<DashboardController> logger,CipherDropConte
         }
         return View(model);
     }
+
     private bool IsAdmin()
         {
         if (HttpContext.Items["Session"] is not Session session || session.Role != "admin")
@@ -66,6 +67,7 @@ public class AdminController(ILogger<DashboardController> logger,CipherDropConte
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });

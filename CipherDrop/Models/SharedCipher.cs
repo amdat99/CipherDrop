@@ -15,16 +15,10 @@ public class SharedCipher
     [Required]
     public string CipherId { get; set; } = "";
     public Cipher Cipher { get; set; } = default!;
-
     public int TeamId { get; set; } = 0;
     public Team Team { get; set; } = default!;
-
-    
     public int UserId { get; set; } = 0;
     public User User { get; set; } = default!;
-
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
 }
 

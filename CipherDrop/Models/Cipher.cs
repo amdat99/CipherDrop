@@ -20,16 +20,12 @@ public class Cipher
 
     [MaxLength(8)]
     public string? Type { get; set; } 
-
     public DateTime? ExpiresAt { get; set; }
-
     public bool SelfDestruct { get; set; }  = false;
-
     public byte[]? Password { get; set; } 
     public byte[]? PasswordSalt { get; set; }    
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
     public DateTime? DeletedAt { get; set; }
 }
 

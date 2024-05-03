@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CipherDrop.Models;
 using CipherDrop.Data;
-using CipherDrop.Utils.PasswordUtils;
 
 namespace CipherDrop.Controllers;
 
@@ -17,7 +16,6 @@ public class CipherController(ILogger<LinkController> logger,CipherDropContext c
 
         return View(ciphers);
     }
-
 
     public IActionResult ExpiredOrInvalid() => View();
 

@@ -8,7 +8,6 @@ namespace CipherDrop.Models;
 
 public class User
 {
-
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; } = 0;
 
@@ -29,11 +28,8 @@ public class User
     [Required]
     [MaxLength(10)]
     public string Role { get; set; } = "User";
-
     public string Status { get; set; } = "Active";
-
     public string? Avatar { get; set; } = "";
-
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 

@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace CipherDrop.Models;
 
 public class UserActivityViewModel
 {
-
     public int Id { get; set; } = 0;
     public string Area { get; set; } = "";
     public int? AreaId { get; set; } = 0;
@@ -15,7 +13,5 @@ public class UserActivityViewModel
     public string Type { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
-
 }
 

@@ -27,7 +27,6 @@ public class UpdateItem
 
     [Required]
     public int? UserId { get; set; } = 0;
-
     public int? FolderId { get; set; }
 
     [MaxLength(60)]
@@ -40,13 +39,9 @@ public class UpdateItem
 
     [MaxLength(8)]
     public string? Type { get; set; } 
-
     public DateTime? ExpiresAt { get; set; }
-
     public DateTime CreatedAt { get; set; } 
-
     public DateTime UpdatedAt { get; set; }
-
     public DateTime? DeletedAt { get; set; }
 }
 

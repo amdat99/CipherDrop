@@ -6,7 +6,6 @@ namespace CipherDrop.Models;
 
 public class Session
 {
-
     [Required]
     [MaxLength(90)]
     public string Id { get; set; } = "";
@@ -32,13 +31,9 @@ public class Session
 
     [MaxLength(10)]
     public string Role { get; set; } = "User";
-
     public bool Active { get; set; } = true;
-
     public DateTime? ExpiresAt { get; set; }
-
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 

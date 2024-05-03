@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CipherDrop.Migrations
 {
     /// <inheritdoc />
-    public partial class Inital : Migration
+    public partial class VautlItems : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,16 +17,23 @@ namespace CipherDrop.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    PublicRegistration = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultItemViewRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultItemEditRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultItemDeleteRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultFolderViewRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultFolderEditRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDefaltVaultFolderDeleteRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
                     InviteOnly = table.Column<bool>(type: "INTEGER", nullable: false),
                     Require2FA = table.Column<bool>(type: "INTEGER", nullable: false),
                     RequireEmailVerification = table.Column<bool>(type: "INTEGER", nullable: false),
                     RequirePasswordChange = table.Column<bool>(type: "INTEGER", nullable: false),
-                    RequirePasswordChangeDays = table.Column<string>(type: "TEXT", nullable: false),
+                    RequirePasswordChangeDays = table.Column<string>(type: "TEXT", maxLength: 5, nullable: false),
                     RequirePasswordChangeOnFirstLogin = table.Column<bool>(type: "INTEGER", nullable: false),
                     AllowPublicSharing = table.Column<bool>(type: "INTEGER", nullable: false),
                     DisplayActivity = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Timezone = table.Column<string>(type: "TEXT", nullable: false)
+                    Timezone = table.Column<string>(type: "TEXT", maxLength: 5, nullable: false),
+                    EncyptionTestText = table.Column<string>(type: "TEXT", maxLength: 90, nullable: false),
+                    KeyEnd = table.Column<string>(type: "TEXT", maxLength: 16, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -111,6 +118,26 @@ namespace CipherDrop.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserActivity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Area = table.Column<string>(type: "TEXT", maxLength: 15, nullable: false),
+                    AreaId = table.Column<int>(type: "INTEGER", nullable: true),
+                    StringAreaId = table.Column<string>(type: "TEXT", maxLength: 90, nullable: true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Action = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivity", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserInvite",
                 columns: table => new
                 {
@@ -135,11 +162,12 @@ namespace CipherDrop.Migrations
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     Reference = table.Column<string>(type: "TEXT", maxLength: 60, nullable: true),
-                    Value = table.Column<string>(type: "TEXT", maxLength: 10000, nullable: false),
+                    Value = table.Column<string>(type: "TEXT", maxLength: 5000, nullable: false),
                     Type = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
                     ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     SelfDestruct = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Password = table.Column<string>(type: "TEXT", nullable: true),
+                    Password = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    PasswordSalt = table.Column<byte[]>(type: "BLOB", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
@@ -185,25 +213,26 @@ namespace CipherDrop.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserActivity",
+                name: "VaultFolder",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Area = table.Column<string>(type: "TEXT", maxLength: 15, nullable: false),
-                    AreaId = table.Column<int>(type: "INTEGER", nullable: true),
-                    StringAreaId = table.Column<string>(type: "TEXT", maxLength: 90, nullable: true),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Action = table.Column<string>(type: "TEXT", nullable: false),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Reference = table.Column<string>(type: "TEXT", maxLength: 60, nullable: true),
+                    IsRoot = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsViewRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsEditRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDeleteRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserActivity", x => x.Id);
+                    table.PrimaryKey("PK_VaultFolder", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserActivity_User_UserId",
+                        name: "FK_VaultFolder_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id",
@@ -219,8 +248,7 @@ namespace CipherDrop.Migrations
                     CipherId = table.Column<string>(type: "TEXT", nullable: false),
                     TeamId = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -241,6 +269,77 @@ namespace CipherDrop.Migrations
                         name: "FK_SharedCipher_User_UserId",
                         column: x => x.UserId,
                         principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VaultItem",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    FolderId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Reference = table.Column<string>(type: "TEXT", maxLength: 60, nullable: true),
+                    Value = table.Column<string>(type: "TEXT", maxLength: 20000, nullable: false),
+                    IsFolder = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsViewRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsEditRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsDeleteRestricted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
+                    ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VaultItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VaultItem_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VaultItem_VaultFolder_FolderId",
+                        column: x => x.FolderId,
+                        principalTable: "VaultFolder",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SharedVaultItemView",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    VaultItemId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TeamId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SharedVaultItemView", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SharedVaultItemView_Team_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Team",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SharedVaultItemView_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SharedVaultItemView_VaultItem_VaultItemId",
+                        column: x => x.VaultItemId,
+                        principalTable: "VaultItem",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -271,6 +370,21 @@ namespace CipherDrop.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SharedVaultItemView_TeamId",
+                table: "SharedVaultItemView",
+                column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SharedVaultItemView_UserId",
+                table: "SharedVaultItemView",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SharedVaultItemView_VaultItemId_UserId",
+                table: "SharedVaultItemView",
+                columns: new[] { "VaultItemId", "UserId" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Team_Name",
                 table: "Team",
                 column: "Name",
@@ -293,14 +407,24 @@ namespace CipherDrop.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserActivity_UserId",
-                table: "UserActivity",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserInvite_Email",
                 table: "UserInvite",
                 column: "Email");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaultFolder_UserId",
+                table: "VaultFolder",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaultItem_FolderId",
+                table: "VaultItem",
+                column: "FolderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VaultItem_UserId",
+                table: "VaultItem",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -319,6 +443,9 @@ namespace CipherDrop.Migrations
                 name: "SharedCipher");
 
             migrationBuilder.DropTable(
+                name: "SharedVaultItemView");
+
+            migrationBuilder.DropTable(
                 name: "TeamUser");
 
             migrationBuilder.DropTable(
@@ -331,7 +458,13 @@ namespace CipherDrop.Migrations
                 name: "Cipher");
 
             migrationBuilder.DropTable(
+                name: "VaultItem");
+
+            migrationBuilder.DropTable(
                 name: "Team");
+
+            migrationBuilder.DropTable(
+                name: "VaultFolder");
 
             migrationBuilder.DropTable(
                 name: "User");
