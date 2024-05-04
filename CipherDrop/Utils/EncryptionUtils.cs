@@ -5,7 +5,8 @@ namespace CipherDrop.Utils
 {
     public class EncryptionUtils()
     {
-         public static string Encrypt(string plainText, string? key = null)
+        public static string? EncryptionKey { get; set; }
+        public static string Encrypt(string plainText, string? key = null)
         {
             using var aes = Aes.Create();
             aes.KeySize = 256;
@@ -39,6 +40,10 @@ namespace CipherDrop.Utils
             if( key != null )
             {
                 return key;
+            }
+            else if( EncryptionKey != null )
+            {
+                return EncryptionKey;
             }
             return Environment.GetEnvironmentVariable("ENCRYPTION_KEY") ?? throw new Exception("ENCRYPTION_KEY not set");
         }

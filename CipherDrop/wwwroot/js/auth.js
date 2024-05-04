@@ -1,4 +1,12 @@
-// Auth functions
+/**
+ * Handles local key verification and setting user values to local storage if data parameter is passed in
+ * @param {object} data - The user data to set in local storage
+ * @param {string} data.email - The user email
+ * @param {string} data.role - The user role
+ * @param {string} data.name - The user name
+ * @returns {string} - The token
+ * @returns {void}
+ */
 function CheckAuth(data) {
   if (data?.email) {
     localStorage.setItem("email", data.email);
@@ -21,13 +29,15 @@ const onSetToken = () => {
     content: `
        <div class="mb-3">
           <label for="token" class="form-label">Enter your token</label>
-          <input type="text" class="form-control" id="verify-token" name="token" required maxlength="64">
+          <input type="password" class="form-control" id="verify-token" name="token" required maxlength="64">
         </div>
         <div style="display:none;" id="decryptError" class="mt-2">
           Token verification failed. Please try again
         </div>
       `,
     buttonText: "Unlock",
+    minWidth: "350px",
+    backdropClose: false,
     submitFunction: () => verifyToken(),
   });
 };
@@ -47,6 +57,14 @@ const verifyToken = async () => {
 };
 
 let AdminSettings = null;
+
+/**
+ * Handles fetching admin settings and setting the value to the AdminSettings variable
+ *
+ * @returns {object} - The admin settings
+ * @example
+ * const adminSettings = await FetchAdminSettings();
+ */
 
 const FetchAdminSettings = async () => {
   if (AdminSettings) return AdminSettings;

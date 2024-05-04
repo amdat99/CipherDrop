@@ -1,12 +1,14 @@
 :root {
-  --primary-color: #5dd461; 
-  --secondary-color: #80ff84 /* Light Green */
+  --primary-color: #5dd461;
+  --secondary-color: #343a40;
   --success-color: #4caf50; /* Green */
   --info-color: #03a9f4; /* Light Blue */
   --warning-color: #ffc107; /* Amber */
   --danger-color: #f44336; /* Red */
   --light-color: #f5f5f5; /* Light Gray */
   --dark-color: #424242; /* Gray */
+  --card-color: #212529; /* Darker color for card background */
+  --card-border-color: #1a1a1a; /* Darker color for card border */
 }
 
 html {
@@ -55,7 +57,6 @@ a:hover {
 table th tbody {
   color: #fff; /* White text color */
   border-radius: 5px;
-
 }
 
 dialog {
@@ -75,21 +76,40 @@ dialog[open] {
 .text-secondary {
   color: var(--secondary-color);
 }
+.nav-link {
+  font-size: 15px !important;
+  font-weight: 500;
+}
+
+.dropdown-menu {
+  background-color: var(--card-color);
+  border: 1px solid var(--card-border-color);
+  color: #fff !important;
+}
+
+.dropdown-item {
+  color: #fff !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color) !important;
+}
 
 .card {
   border-radius: 5px;
   transition: transform 0.3s ease-in-out;
-  background-color: #212529; /* Darker color for card background */
+  background-color: var(--card-color); /* Darker color for card background */
   color: #fff; /* White color for card text */
-  border : 1px solid #1a1a1a;
+  border: 1px solid var(--card-border-color); /* Darker color for card border */
 }
 
 .card-header {
-  border-bottom: 1px solid #343a40;
+  border-bottom: 1px solid var(--secondary-color);
 }
 
 .card-footer {
-  background-color: #3F434A;
+  background-color: var(--secondary-color);
   border-radius: 0 0 15px 15px;
 }
 
@@ -165,19 +185,24 @@ dialog[open] {
   width: 60px;
   margin: 10px auto;
   aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side,#4caf50 90%,#0000);
-  background: 
-    var(--_g) 0%   50%,
-    var(--_g) 50%  50%,
-    var(--_g) 100% 50%;
-  background-size: calc(100%/3) 50%;
+  --_g: no-repeat radial-gradient(circle closest-side, #4caf50 90%, #0000);
+  background: var(--_g) 0% 50%, var(--_g) 50% 50%, var(--_g) 100% 50%;
+  background-size: calc(100% / 3) 50%;
   animation: l3 1s infinite linear;
 }
 @keyframes l3 {
-    20%{background-position:0%   0%, 50%  50%,100%  50%}
-    40%{background-position:0% 100%, 50%   0%,100%  50%}
-    60%{background-position:0%  50%, 50% 100%,100%   0%}
-    80%{background-position:0%  50%, 50%  50%,100% 100%}
+  20% {
+    background-position: 0% 0%, 50% 50%, 100% 50%;
+  }
+  40% {
+    background-position: 0% 100%, 50% 0%, 100% 50%;
+  }
+  60% {
+    background-position: 0% 50%, 50% 100%, 100% 0%;
+  }
+  80% {
+    background-position: 0% 50%, 50% 50%, 100% 100%;
+  }
 }
 
 .modal-backdrop {
@@ -201,4 +226,43 @@ dialog[open] {
     transform: scale(1);
   }
 }
- 
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background-color: #343a40 !important;
+}
+
+*::-webkit-scrollbar-track:hover {
+  background-color: #343a40;
+}
+
+*::-webkit-scrollbar-track:active {
+  background-color: #343a40;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: #808080;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a7a7;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: #c1bfbf;
+}
+/* horizontal scroll */
+::-webkit-scrollbar {
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #dfe9eb;
+}

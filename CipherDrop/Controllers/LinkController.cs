@@ -46,7 +46,8 @@ public class LinkController(ILogger<LinkController> logger,CipherDropContext con
     {   
         if(!ModelState.IsValid)
         {
-            return View(model);
+            TempData["Error"] = "Invalid Password";
+            return View( new Cipher());
         }
 
         if (string.IsNullOrEmpty(id))
@@ -63,8 +64,8 @@ public class LinkController(ILogger<LinkController> logger,CipherDropContext con
         
         if (!PasswordUtils.VerifyPasswordHash(model.Password, cipher.Password, cipher.PasswordSalt))
             {
-                ModelState.AddModelError("Password" , "Invalid Password");
-                return View(model);
+                TempData["Error"] = "Invalid Password";
+                return View(new Cipher());
             }
         
         DeleteCipherIfSelfDestruct(cipher);

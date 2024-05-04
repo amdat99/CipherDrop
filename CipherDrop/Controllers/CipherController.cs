@@ -12,9 +12,7 @@ public class CipherController(ILogger<LinkController> logger,CipherDropContext c
     public IActionResult Index()
     {
         int userId = (HttpContext.Items["Session"] as Session)?.UserId ?? 0;
-        var ciphers = context.Cipher.Where(c => c.UserId == userId).Take(30).ToList();
-
-        return View(ciphers);
+        return View(context.Cipher.Where(c => c.UserId == userId).Take(30).OrderByDescending(c => c.CreatedAt).ToList());
     }
 
     public IActionResult ExpiredOrInvalid() => View();

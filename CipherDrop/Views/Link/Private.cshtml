@@ -40,7 +40,12 @@
                     <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-block">Enter</button>
                     </div>    
-                    <div asp-validation-summary="All" class="text-danger mt-3"></div>
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger mt-3" role="alert">
+                            @TempData["Error"]
+                        </div>
+                    }
                 </form>
             }
             </div>
@@ -51,10 +56,14 @@
 @section Scripts {
     <script type="text/javascript">
             const value = document.getElementById('CipherValue')
-            if(!value) return;
-            const decrypted = CryptoJS.AES.decrypt(value.value, '@TempData["Password"]').toString(CryptoJS.enc.Utf8);
-            value.value = decrypted;
-            value.style.display = 'block';
-            document.querySelector('.loader').style.display = 'none';
+            console.log(value.value)
+           
+           if(value.value){
+                const decrypted = CryptoJS.AES.decrypt(value.value, '@TempData["Password"]').toString(CryptoJS.enc.Utf8);
+                console.log(decrypted)
+                value.value = decrypted;
+                value.style.display = 'block';
+                document.querySelector('.loader').style.display = 'none';
+            }
     </script>
 }

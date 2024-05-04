@@ -1,9 +1,72 @@
 let currentFolder = null;
 let isFolder = true;
 let lastId = 0;
+let scrolllTimeout = null;
+let noMoreFolders = false;
+let folderLoading = false;
+
+(() => {
+  VaultFolderList.on("scroll", function () {
+    console.log("scroll");
+    //Check if folders are more than 40 and if the user has scrolled to the bottom
+    if (!noMoreFolders && !folderLoading && this.scrollTop + this.clientHeight >= this.scrollHeight - 30 && VaultFolderList.children().length > 40) {
+      scrolllTimeout && clearTimeout(scrolllTimeout);
+      scrolllTimeout = setTimeout(async () => {
+        //get the last folder id
+        const lastFolder = $(".vault-root-folder").last()[0];
+        if (!lastFolder) return;
+        lastId = lastFolder.id.split("-")[2];
+
+        folderLoading = true;
+        const folders = await RequestHandler({ url: `/vault/rootfolders?lastId=${lastId}`, method: "GET" });
+        folderLoading = false;
+        if (!folders?.data) return;
+        else if (folders.data.length === 0) return (noMoreFolders = true);
+
+        folders.data.forEach((folder) => {
+          VaultFolderList.append(`<div id="root-folder-${folder.id}" class="vault-root-folder">${folder.reference}</div>`);
+        });
+
+        $(".vault-root-folder").off("click");
+        OnRootFolderClick();
+      }, 100);
+    }
+  });
+})();
+
+(() => {
+  VaultAddItemBtn.off("click");
+  VaultAddItemBtn.on("click", function () {
+    if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
+    DisplayModal({
+      content: `
+      <div class="mb-3">
+        <label for="fileReference" class="form-label">Item name</label>
+        <input type="text" class="form-control" id="fileReference" name="fileReference" required>
+      </div>
+      `,
+      buttonText: "Add Item",
+      submitFunction: () => AddItem(window.currentFolderId),
+    });
+  });
+  VaultAddSubFolderBtn.off("click");
+  VaultAddSubFolderBtn.on("click", function () {
+    if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
+    DisplayModal({
+      content: `
+      <div class="mb-3">
+        <label for="folderName" class="form-label">Folder Name</label>
+        <input type="text" class="form-control" id="folderName" name="folderName" required>
+      </div>
+      `,
+      buttonText: "Add Sub Folder",
+      submitFunction: () => AddSubfolder(window.currentFolderId),
+    });
+  });
+})();
 
 const OnRootFolderClick = () => {
-  $(".vault-root-folder").on("click", async function (e) {
+  $(".vault-root-folder").on("click", function (e) {
     const folderId = this.id.split("-")[2];
     showListViwer();
     //Check if the folder is already selected if not set items for the folder
@@ -15,7 +78,7 @@ const OnRootFolderClick = () => {
     this.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
     currentFolder = e.target;
 
-    //Set fiolder path and and add listener to folder name in path
+    //Set folder path and and add listener to folder name in path
     $("#file-path").html(`<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${this.innerText}</a>`);
 
     $(".file-path-item").off("click");
@@ -29,17 +92,13 @@ const OnRootFolderClick = () => {
       setItems(folderId, true);
     });
 
-    //Detch folder items and render them if any
+    //fetch folder items and render them if any
     setItems(folderId);
-
-    //Add event listener to add item button and show the button
-    DisplayAddItemBtnWithModal(folderId);
 
     //Add id to url
     window.history.pushState(null, null, `/vault/home/${folderId}`);
   });
 };
-
 //Run the function on load
 OnRootFolderClick();
 
@@ -51,34 +110,13 @@ const setItems = async (folderId, removeItemEListener = false) => {
 
   items.forEach((item) => {
     VaultFileList.append(
-      `<div id="item-${item.id}" class="vault-item p-3"><span>${item.reference}</span><span >${new Date(item.updatedAt).toLocaleDateString()}</span></div>`
+      `<div id="item-${item.id}" class="vault-item p-3"><span>${item.isFolder ? "📁" : "📄"} ${item.reference}</span><span >${new Date(
+        item.updatedAt
+      ).toLocaleDateString()}</span></div>`
     );
   });
 
   OnItemClick(removeItemEListener);
-};
-
-const DisplayAddItemBtnWithModal = (folderId) => {
-  const addItemBtn = $("#vault-add-file");
-  addItemBtn.show();
-  addItemBtn.off("click");
-  addItemBtn.on("click", function () {
-    DisplayModal({
-      content: `
-      <div class="mb-3">
-        <label for="fileReference" class="form-label">Reference</label>
-        <input type="text" class="form-control" id="fileReference" name="fileReference" required>
-      </div>
-      <div class="mb-3">
-        <label for="value" class="form-label">Value</label>
-        <textarea class="form-control" id="value" name="value" required></textarea>
-      </div>
-      `,
-      buttonText: "Add Item",
-      submitFunction: () => AddItem(folderId),
-      minWidth: "90vw",
-    });
-  });
 };
 
 const fetchFolderItems = async (folderId, reset = true) => {

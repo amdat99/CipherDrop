@@ -26,9 +26,9 @@
 
 <input id="RequestVerificationToken" type="hidden" value="@requestToken" />
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark  mb-3">
+        <nav class="navbar navbar-expand-lg " style="max-height: 50px">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CipherDrop</a>
+                <a class="navbar-brand font-weight-bold"asp-area="" asp-controller="Home" asp-action="Index">CipherDrop</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -69,18 +69,19 @@
                 </div>
             </div>
         </nav>
-    </header>
-
-    <div class="container">
+    </header>    
+    <div class="">       
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+    </div>    
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div class="toast-container"></div>
     </div>
-
     <footer class="footer text-muted">
-        <div class="container">
+        @* <div class="container">
             &copy; 2024 - CipherDrop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+        </div> *@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

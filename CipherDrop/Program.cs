@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using CipherDrop.Data;
@@ -38,18 +39,34 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
+    // Ensure the encryption key is set manually in production
+    Console.WriteLine("Enter the encryption key for the application: ");
+    var encryptionKey = Console.ReadLine();
+    if (string.IsNullOrEmpty(encryptionKey))
+    {
+        Console.WriteLine("Encryption key cannot be empty. Exiting...");
+        return;
+    }
+    // Set the encryption key in the application
+    EncryptionUtils.EncryptionKey = encryptionKey;
+
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 //Session Middleware
 app.UseMiddleware<SessionMiddleware>();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

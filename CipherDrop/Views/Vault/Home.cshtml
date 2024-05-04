@@ -9,10 +9,11 @@
 </script>
 
 <link rel="stylesheet" href="~/css/vault.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/tiny.css" asp-append-version="true" />
 
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-lg-3">
             <!-- Left Sidebar for Folders -->
             <div class="card folder-view">
                 <div class="d-flex justify-content-between align-items-center p-3">
@@ -21,22 +22,36 @@
                         <i class="bi bi-folder-plus"></i> Add Folder
                     </button>
                 </div>
+                <input type="text" id="folder-search" class="ml-3 mr-3 border-0 bg-transparent mx-3 mb-1 text-white"
+                 placeholder="Search Folders" >
                 <div class="vault-folder-list p-3">
                     @foreach (var folder in Model)
                     {
-                        <div id="root-folder-@folder.Id" class="vault-root-folder">@folder.Reference</div>
+                        <div id="root-folder-@folder.Id" class="vault-root-folder">📁@folder.Reference</div>
                     }
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-lg-9">
             <!-- Middle Content for Files -->
             <div class="card file-view">
                 <div class="card-header d-flex justify-content-between align-items-center p-3">
                     <div id="file-path">Files</div>
-                    <button type="button" class="btn btn-primary btn-sm bg-dark text-white" id="vault-add-file" style="display:none">
-                        <i class="bi bi-file-earmark-plus"></i> Add File
-                    </button>
+                    <div id=folder-actions class="d-flex flex-row" style="display:none">
+                        <input type="text" id="item-search" class="ml-3 mr-3 border-0 bg-dark mt-1 mx-3 mb-1 text-white" placeholder="Search..." >
+                        <div class="dropdown">
+                            <button id="vault-add-item" class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button"  data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-file-earmark-plus"></i> Add Item
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="vault-add-item">
+                                <li><button id="add-default-item" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit your content as a secure note">Add Default Item</button></li>
+                                <li><button id="add-sub-folder" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a subfolder to the current folder">Add Subfolder</button></li>
+                                <li><a class="dropdown-item" href="#">Requestable Item</a></li>
+                                <li><a class="dropdown-item" href="#">Api Item</a></li>
+                                <li><a class="dropdown-item" href="#">Attachment Only</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div id="vault-file-list"></div>
@@ -44,7 +59,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <input type="text" id="file-viewer-reference" class="form-control border-0 bg-transparent" placeholder="File Name" style="color: white">
                         </div>
-                        <textarea id="file-viewer-content" class="form-control mt-3" rows="10" placeholder="File Content"></textarea>
+                        <textarea id="file-viewer-content" class="form-control mt-3" rows="10" placeholder=""></textarea>
                     </div>
                 </div>
             </div>
@@ -52,10 +67,39 @@
     </div>
     <input type="hidden" id="RequestVerificationToken" name="RequestVerificationToken" value='@Html.AntiForgeryToken()'>
 </div>
-
 @section Scripts {    
+    <script src="~/lib/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" ></script>
+    <script src="~/lib/tinymce/js/tinymce/themes/silver/theme.min.js"></script>
     <script src="~/js/vault/vaultVars.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
     <script src="~/js/vault/vault.js" asp-append-version="true"></script>    
     <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
+    <script type="text/javascript">
+        tinymce.init({
+            selector: '#file-viewer-content',
+            license_key: 'gpl',
+            height: '60vh',
+            content_css : "/css/tiny.css",
+            promotion: false,
+            branding: false,
+            highlight_on_focus: false,
+            menubar: 'edit view insert format tools table tc',
+            contextmenu: 'undo redo copy | inserttable format | cell row column deletetable | help',
+            powerpaste_word_import: 'clean',
+            powerpaste_html_import: 'clean',
+            powerpaste_allow_local_images: true,
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table media pageembed | removeformat fullscreen',
+            setup: function (editor) {
+                editor.on('change', function (e) {
+                    OnVauleChange(e);
+                });
+                editor.on('input', function (e) {
+                    OnVauleChange(e);
+                });
+            }
+            });
+            //Add tooltips
+            InitialiseTooltips();
+    </script>
 }

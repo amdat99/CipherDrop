@@ -14,11 +14,11 @@ public class DashboardController(ILogger<DashboardController> logger,CipherDropC
     public IActionResult Index()
     {
     return View(context.UserActivity.OrderByDescending(a => a.CreatedAt)
-                    .Take(30)
-                    .ToList()
                     .Join(context.User, a => a.UserId, u => u.Id, (a, u) => new { a, u })
                     .Select(au => new UserActivityViewModel{ Area = au.a.Area, Action = au.a.Action, Type = au.a.Type,
-                                CreatedAt = au.a.CreatedAt, UserName = au.u.Name })
+                                CreatedAt = au.a.CreatedAt, UserName = au.u.Name })  
+                    .Take(30)
+                    .OrderByDescending(a => a.CreatedAt)                   
                     .ToList());
     }
 

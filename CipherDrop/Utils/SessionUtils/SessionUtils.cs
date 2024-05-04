@@ -15,7 +15,7 @@ namespace CipherDrop.Utils.SessionUtils
             }
 
             // Retrieve session from the database based on the token
-            var session = await context.Session.FirstOrDefaultAsync(s => s.Id == token);
+            var session = await context.Session.Where(s => s.Id == token).FirstOrDefaultAsync();
 
             if (session != null && session.ExpiresAt > DateTime.UtcNow)
             {

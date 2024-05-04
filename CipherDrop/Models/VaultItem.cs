@@ -19,7 +19,7 @@ public class VaultItem
     public string? Reference { get; set; }
 
     [Required]
-    [MaxLength(20000)]
+    [MaxLength(200000)]
     public string Value { get; set; } = "";
     public bool IsFolder { get; set; } = false; 
 

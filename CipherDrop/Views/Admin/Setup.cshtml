@@ -21,7 +21,7 @@
             <div class="card mt-4 p-3">
               <form asp-controller="Admin" asp-action="Setup" method="post">
                 <div class="mb-3">
-                    <label for="Input_Key" class="form-label">Enter a custom password for encryption or click the button to generate a random key. Make sure to save this key as it will be used to login</label>
+                    <label for="Input_Key" class="form-label">Enter a custom phrase for the encryption key or click the button to generate a random text for the key.</label>
                     <input type="text" class="form-control" id="Input_Key" name="Key" required minlength="10"  value="@Model.Key">
                     <span asp-validation-for="Key" class="text-danger"></span>                    
                 </div>
@@ -31,6 +31,9 @@
                 <div class="mb-3">
                     <button type="button" id="generate_key" class="btn btn-primary btn-block">Generate Key</button>
                 </div>   
+                <p>
+                    Make sure to save the encryption key as it will be used to locally encrypt & decrypt your data. It will not be stored on the server, so if you lose it, you will lose access to your data.
+                </p>
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-primary btn-block">Setup</button>
                 </div>                    

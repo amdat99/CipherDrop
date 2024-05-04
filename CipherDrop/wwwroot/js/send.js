@@ -1,7 +1,12 @@
 let inputType = document.getElementById("Input_Type");
 
+document.addEventListener("DOMContentLoaded", () => {
+  togglePassword();
+  encryptValue();
+});
+
 //Toggle password fields
-(() => {
+const togglePassword = () => {
   const passwordContainer = document.getElementById("Input_Password_Container");
   const confirmPasswordContainer = document.getElementById("Input_ConfirmPassword_Container");
   const passwordInput = document.getElementById("Input_Password");
@@ -22,12 +27,12 @@ let inputType = document.getElementById("Input_Type");
       confirmPasswordInput.required = false;
     }
   });
-})();
+};
 
 let valueField = null;
 
 //Encrypt value before sending if not public type
-(() => {
+const encryptValue = () => {
   document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
     if (inputType.value === "public") return this.submit();
@@ -40,4 +45,4 @@ let valueField = null;
     valueField.value = encrypted;
     this.submit();
   });
-})();
+};

@@ -20,12 +20,13 @@ const addRootFolder = async () => {
   if (request.success) {
     CloseModal();
 
-    $(".vault-folder-list").append(` <div id="root-folder-${request.id}" class="vault-root-folder">${FolderName}</div>`);
+    VaultFolderList.append(` <div id="root-folder-${request.id}" class="vault-root-folder">${FolderName}</div>`);
 
     //remove event listener for folder click first and then add it again with the new folder
     $(".vault-root-folder").off("click");
     OnRootFolderClick();
+    DisplayToast({ message: "Folder added successfully", type: "success" });
   } else {
-    alert("An error occured");
+    DisplayToast({ message: request?.message || "An error occured", type: "danger" });
   }
 };
