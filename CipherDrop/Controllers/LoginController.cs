@@ -2,9 +2,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CipherDrop.Models;
 using CipherDrop.Data;
-using CipherDrop.Utils.PasswordUtils;
-using CipherDrop.Utils.SessionUtils;
 using CipherDrop.Utils;
+using CipherDrop.Services;
 
 namespace CipherDrop.Controllers;
 
@@ -27,7 +26,7 @@ public class LoginController(CipherDropContext context, AdminSettingsService adm
                 return LoginError(model);
             }
             //Get admin settings and redirect to setup page if not set
-            var adminSettings = await adminSettingsService.GetAdminSettings(context);
+            var adminSettings = await adminSettingsService.GetAdminSettingsAsync(context);
             if (adminSettings == null)
             {
                 return RedirectToAction("Setup", "Admin");
@@ -37,7 +36,7 @@ public class LoginController(CipherDropContext context, AdminSettingsService adm
                 return LoginError(model);
             }
 
-           await SessionUtils.CreateSessionAsync(user, context, Response);
+           await SessionService.CreateSessionAsync(user, context, Response);
 
             TempData["Email"] = model.Email;
             TempData["Name"] = user.Name;

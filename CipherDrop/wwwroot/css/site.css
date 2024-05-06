@@ -70,11 +70,11 @@ dialog[open] {
 }
 
 .text-primary {
-  color: var(--primary-color);
+  color: var(--primary-color) !important;
 }
 
 .text-secondary {
-  color: var(--secondary-color);
+  color: var(--secondary-color) !important;
 }
 .nav-link {
   font-size: 15px !important;

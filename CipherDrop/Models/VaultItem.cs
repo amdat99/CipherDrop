@@ -14,6 +14,7 @@ public class VaultItem
     public User? User { get; set; } = default!;
     public int? FolderId { get; set; }
     public VaultFolder? Folder { get; set; } 
+    public int? RootFolderId { get; set; }
 
     [MaxLength(60)]
     public string? Reference { get; set; }

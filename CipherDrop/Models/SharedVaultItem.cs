@@ -6,20 +6,18 @@ namespace CipherDrop.Models;
 
 [Index(nameof(VaultItemId), nameof(UserId))]
 
-public class SharedVaultItemView
+public class SharedVaultItem
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Required]
     public int Id { get; set; } 
-
-    [Required]
-    public int VaultItemId { get; set; } = 0;
-    public VaultItem VaultItem { get; set; } = default!;
-
-    public int TeamId { get; set; } = 0;
-    public Team Team { get; set; } = default!;
-    public int UserId { get; set; } = 0;
-    public User User { get; set; } = default!;
+    public int? VaultItemId { get; set; }
+    public VaultItem? VaultItem { get; set; }
+    public string Role = "View";
+    public int? TeamId { get; set; }
+    public Team? Team { get; set; }
+    public int? UserId { get; set; }
+    public User? User { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }
 

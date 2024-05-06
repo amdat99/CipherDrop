@@ -13,20 +13,53 @@
 }
 
 .file-view {
-  min-height: calc(100vh - 150px) !important;
-  max-height: calc(100vh - 150px) !important;
+  min-height: calc(100vh - 140px);
+  max-height: calc(100vh - 140px);
   overflow: auto;
 }
 
 .folder-view {
-  min-height: calc(100vh - 150px) !important;
-  max-height: calc(100vh - 150px) !important;
+  min-height: calc(100vh - 140px);
+  max-height: calc(100vh - 140px);
   overflow: auto;
 }
 
 .vault-folder-list {
   overflow-y: auto;
   background: #212529d0;
+}
+
+@media screen and (max-width: 992px) {
+  .folder-view {
+    min-height: 135px;
+    max-height: 135px;
+    overflow: auto;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+
+  .file-view {
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+  }
+
+  .vault-folder-list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    margin-bottom: 10px;
+    min-height: fit-content;
+    min-width: fit-content;
+  }
+
+  .vault-root-folder {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+
+  .folder-search {
+    display: none;
+  }
 }
 
 .vault-root-folder {
@@ -64,4 +97,57 @@
 .vault-item:hover {
   background-color: #343a40;
   transition: background-color 0.3s;
+}
+
+.vault-tabs {
+  padding: 0 !important;
+  max-height: 17px;
+  font-size: 12px !important;
+}
+
+.item-actions {
+  border-radius: 6px;
+  color: #fff !important;
+  border-color: transparent !important;
+  text-align: center;
+  padding: 0 10px 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+  background-color: #343a40 !important;
+}
+
+.vault-tabs .nav-link {
+  margin-right: 0px !important;
+  font-size: 13px !important;
+  cursor: pointer;
+  text-align: center;
+  min-width: 70px;
+  max-width: 140px;
+  text-overflow: ellipsis;
+  padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.vault-tabs .nav-link.active {
+  color: #fff !important;
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  border-bottom: 0.5px solid var(--primary-color) !important;
+}
+
+.file-path-item {
+  position: relative;
+  font-size: 15px;
+  top: 7px;
+}
+
+.file-path-item:hover {
+  color: #fff !important;
+}
+
+#user-permissions .table td:nth-child(2) {
+  width: 60%;
 }

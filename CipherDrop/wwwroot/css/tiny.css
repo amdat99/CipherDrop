@@ -1,3 +1,7 @@
+#tinymce a {
+  color: #5dd461 !important;
+}
+
 .mce-content-body {
   color: #fff !important;
   border-color: transparent !important;
@@ -59,6 +63,10 @@
 .tox-tbtn {
   background-color: var(--secondary-color) !important;
   color: #fff !important;
+}
+
+.tox .tox-tbtn:hover svg {
+  fill: var(--card-color) !important;
 }
 
 .tox .tox-tbtn svg {
@@ -133,6 +141,29 @@
 .tox-textfield:focus {
   border-color: var(--primary-color) !important;
   outline: none !important;
+}
+
+.tox-label {
+  color: #fff !important;
+}
+
+.tox .tox-dialog__body-nav-item {
+  color: #fff !important;
+}
+
+.tox-dialog__body-nav-item--active {
+  border-bottom-color: var(--primary-color) !important;
+}
+.tox-dialog__table {
+  color: #fff !important;
+}
+
+.tox .tox-statusbar__resize-handle svg {
+  fill: #ffffffc0;
+}
+
+.tox-statusbar__resize-handle:hover svg {
+  fill: #fff;
 }
 /* Chrome, Edge and Safari */
 *::-webkit-scrollbar {

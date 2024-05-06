@@ -2,30 +2,27 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CipherDrop.Models;
 using CipherDrop.Data;
-using CipherDrop.Utils.PasswordUtils;
+using CipherDrop.Utils;
+using CipherDrop.Services;
 
 namespace CipherDrop.Controllers;
 
-public class LinkController(ILogger<LinkController> logger,CipherDropContext context) : Controller
+public class LinkController(CipherDropContext context) : Controller
 {
-    private readonly ILogger<LinkController> _logger = logger;
-
     public IActionResult Public(string id)
     {
         if (string.IsNullOrEmpty(id))
         {
             return RedirectToAction("Index", "Home");
         }
-
         var cipher = context.Cipher.FirstOrDefault(c => c.Id == id && c.Type == "public");
-
         if (cipher == null || cipher.ExpiresAt < DateTime.Now)
         {
             return RedirectToAction("ExpiredOrInvalid");
         }
         
         // Delete the cipher if it is set to self-destruct
-        DeleteCipherIfSelfDestruct(cipher);
+        CipherService.DeleteCipherIfSelfDestruct(context, cipher);
 
         return View(cipher);
     }
@@ -68,21 +65,11 @@ public class LinkController(ILogger<LinkController> logger,CipherDropContext con
                 return View(new Cipher());
             }
         
-        DeleteCipherIfSelfDestruct(cipher);
+        CipherService.DeleteCipherIfSelfDestruct(context, cipher);
 
         TempData["Password"] = model.Password;
         return View(cipher);
-    }
-
-   private void DeleteCipherIfSelfDestruct(Cipher cipher)
-        {
-            if (cipher.SelfDestruct)
-            {
-                context.Cipher.Remove(cipher);
-                context.SaveChangesAsync();
-            }
-        }
-    
+    }    
     public IActionResult ExpiredOrInvalid() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

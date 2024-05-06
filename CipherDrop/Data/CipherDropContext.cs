@@ -18,7 +18,7 @@ namespace CipherDrop.Data
         public DbSet<UserActivity> UserActivity { get; set; } = default!;
         public DbSet<VaultFolder> VaultFolder { get; set; } = default!;
         public DbSet<VaultItem> VaultItem { get; set; } = default!;
-        public DbSet<SharedVaultItemView> SharedVaultItemView { get; set; } = default!;
+        public DbSet<SharedVaultItem> SharedVaultItem { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             {

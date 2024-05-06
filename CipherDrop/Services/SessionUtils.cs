@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using CipherDrop.Data;
 using CipherDrop.Models;
 
-namespace CipherDrop.Utils.SessionUtils
-{
-    public static class SessionUtils
+namespace CipherDrop.Services;
+    public static class SessionService
     {
         public static async Task<Session?> GetSessionAsync(string token, CipherDropContext context)
         {
@@ -98,4 +97,3 @@ namespace CipherDrop.Utils.SessionUtils
             return session != null && session.Role == "Admin";
         }
     }
-}

@@ -3,6 +3,7 @@ using System;
 using CipherDrop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CipherDrop.Migrations
 {
     [DbContext(typeof(CipherDropContext))]
-    partial class CipherDropContextModelSnapshot : ModelSnapshot
+    [Migration("20240506155136_SharedVautlItems2")]
+    partial class SharedVautlItems2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");

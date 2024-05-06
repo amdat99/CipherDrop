@@ -1,17 +1,47 @@
-(() => {
-  $("#addRootFolder").on("click", function () {
-    DisplayModal({
-      content: `
+$("#addRootFolder").on("click", function () {
+  DisplayModal({
+    content: `
         <div class="mb-3">
           <label for="folderName" class="form-label">Folder Name</label>
           <input type="text" class="form-control" id="folderName" name="folderName" required>
         </div>
     `,
-      buttonText: "Add Folder",
-      submitFunction: addRootFolder,
-    });
+    buttonText: "Add Folder",
+    submitFunction: addRootFolder,
   });
-})();
+});
+
+// Add add default item handler
+VaultAddItemBtn.off("click");
+VaultAddItemBtn.on("click", function () {
+  if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
+  DisplayModal({
+    content: `
+      <div class="mb-3">
+        <label for="fileReference" class="form-label">Item name</label>
+        <input type="text" class="form-control" id="fileReference" name="fileReference" required>
+      </div>
+      `,
+    buttonText: "Add Item",
+    submitFunction: () => AddItem(window.currentFolderId),
+  });
+});
+
+//Add add subfolder handler
+VaultAddSubFolderBtn.off("click");
+VaultAddSubFolderBtn.on("click", function () {
+  if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
+  DisplayModal({
+    content: `
+      <div class="mb-3">
+        <label for="folderName" class="form-label">Folder Name</label>
+        <input type="text" class="form-control" id="subfolderName" name="folderName" required>
+      </div>
+      `,
+    buttonText: "Add Sub Folder",
+    submitFunction: () => AddSubfolder(window.currentFolderId),
+  });
+});
 
 const addRootFolder = async () => {
   const FolderName = $("#folderName").val();

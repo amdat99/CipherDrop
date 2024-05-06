@@ -1,8 +1,7 @@
 
 using CipherDrop.Data;
 using CipherDrop.Models;
-using CipherDrop.Utils;
-using CipherDrop.Utils.SessionUtils;
+using CipherDrop.Services;
 
 namespace CipherDrop.Middleware
 {
@@ -32,20 +31,25 @@ namespace CipherDrop.Middleware
 
                 var dbContext = scope.ServiceProvider.GetRequiredService<CipherDropContext>();
                 var adminSettingsService = scope.ServiceProvider.GetRequiredService<AdminSettingsService>();
-                var session = await SessionUtils.GetSessionAsync(token, dbContext);
+                var session = await SessionService.GetSessionAsync(token, dbContext);
 
                 if (session == null)
                 {
                     //Remove the session cookie if it is invalid
                     context.Response.Cookies.Delete("session");
 
-                    // Redirect to login page if session is not valid
-                    context.Response.Redirect("/login");
+                    //If get request, redirect to login page else return 401 unauthorized
+                    if (context.Request.Method == "GET")
+                    {
+                        context.Response.Redirect("/login");
+                        return;
+                    }
+                    context.Response.StatusCode = 401;
                     return;
                 }
 
                 // set  admin settings and redirect to setup page if first time setup has not been completed
-                var adminSettings = await adminSettingsService.GetAdminSettings(dbContext);
+                var adminSettings = await adminSettingsService.GetAdminSettingsAsync(dbContext);
                 if (adminSettings == null)
                 {
                     if(session.Role == "Admin")

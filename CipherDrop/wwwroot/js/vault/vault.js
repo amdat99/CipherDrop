@@ -1,96 +1,65 @@
-let currentFolder = null;
 let isFolder = true;
-let lastId = 0;
 let scrolllTimeout = null;
 let noMoreFolders = false;
 let folderLoading = false;
 
-(() => {
-  VaultFolderList.on("scroll", function () {
-    console.log("scroll");
-    //Check if folders are more than 40 and if the user has scrolled to the bottom
+VaultFolderList.on("scroll", function () {
+  //Check if folders are more than 40 and if the user has scrolled to the bottom
+  scrolllTimeout && clearTimeout(scrolllTimeout);
+  scrolllTimeout = setTimeout(async () => {
     if (!noMoreFolders && !folderLoading && this.scrollTop + this.clientHeight >= this.scrollHeight - 30 && VaultFolderList.children().length > 40) {
-      scrolllTimeout && clearTimeout(scrolllTimeout);
-      scrolllTimeout = setTimeout(async () => {
-        //get the last folder id
-        const lastFolder = $(".vault-root-folder").last()[0];
-        if (!lastFolder) return;
-        lastId = lastFolder.id.split("-")[2];
+      //get the last folder id
+      const lastFolder = $(".vault-root-folder").last()[0];
+      if (!lastFolder) return;
+      LastId = lastFolder.id.split("-")[2];
 
-        folderLoading = true;
-        const folders = await RequestHandler({ url: `/vault/rootfolders?lastId=${lastId}`, method: "GET" });
-        folderLoading = false;
-        if (!folders?.data) return;
-        else if (folders.data.length === 0) return (noMoreFolders = true);
+      folderLoading = true;
+      const folders = await RequestHandler({ url: `/vault/rootfolders?lastId=${LastId}`, method: "GET" });
+      folderLoading = false;
+      if (!folders?.data) return;
+      else if (folders.data.length === 0) return (noMoreFolders = true);
 
-        folders.data.forEach((folder) => {
-          VaultFolderList.append(`<div id="root-folder-${folder.id}" class="vault-root-folder">${folder.reference}</div>`);
-        });
+      folders.data.forEach((folder) => {
+        VaultFolderList.append(`<div id="root-folder-${folder.id}" class="vault-root-folder">${folder.reference}</div>`);
+      });
 
-        $(".vault-root-folder").off("click");
-        OnRootFolderClick();
-      }, 100);
+      $(".vault-root-folder").off("click");
+      OnRootFolderClick();
     }
-  });
-})();
+  }, 100);
+});
 
-(() => {
-  VaultAddItemBtn.off("click");
-  VaultAddItemBtn.on("click", function () {
-    if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
-    DisplayModal({
-      content: `
-      <div class="mb-3">
-        <label for="fileReference" class="form-label">Item name</label>
-        <input type="text" class="form-control" id="fileReference" name="fileReference" required>
-      </div>
-      `,
-      buttonText: "Add Item",
-      submitFunction: () => AddItem(window.currentFolderId),
-    });
+const setFilePath = (folderId, text) => {
+  VaultFilePath.html(`<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a>`);
+  VaultCurrentTab.html(text);
+
+  $(".file-path-item").off("click");
+  $(".file-path-item").on("click", function (e) {
+    e.preventDefault();
+    const folderId = this.id.split("-")[2];
+    showListViwer();
+
+    //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
+    if (window.currentFolderId === folderId) return;
+    setItems(folderId, true);
   });
-  VaultAddSubFolderBtn.off("click");
-  VaultAddSubFolderBtn.on("click", function () {
-    if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
-    DisplayModal({
-      content: `
-      <div class="mb-3">
-        <label for="folderName" class="form-label">Folder Name</label>
-        <input type="text" class="form-control" id="folderName" name="folderName" required>
-      </div>
-      `,
-      buttonText: "Add Sub Folder",
-      submitFunction: () => AddSubfolder(window.currentFolderId),
-    });
-  });
-})();
+};
 
 const OnRootFolderClick = () => {
   $(".vault-root-folder").on("click", function (e) {
     const folderId = this.id.split("-")[2];
     showListViwer();
     //Check if the folder is already selected if not set items for the folder
-    if (window?.currentFolderId === folderId) return;
+    if (window?.currentFolderId === folderId) return VaultCurrentTab.html(CurrentFolder.innerText);
     window.currentFolderId = folderId;
 
     //Change style of selected folder
-    currentFolder && (currentFolder.style = "");
+    CurrentFolder && (CurrentFolder.style = "");
     this.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
-    currentFolder = e.target;
+    CurrentFolder = e.target;
 
     //Set folder path and and add listener to folder name in path
-    $("#file-path").html(`<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${this.innerText}</a>`);
-
-    $(".file-path-item").off("click");
-    $(".file-path-item").on("click", function (e) {
-      e.preventDefault();
-      const folderId = this.id.split("-")[2];
-      showListViwer();
-
-      //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
-      if (window.currentFolderId === folderId) return;
-      setItems(folderId, true);
-    });
+    setFilePath(folderId, this.innerText);
 
     //fetch folder items and render them if any
     setItems(folderId);
@@ -103,10 +72,10 @@ const OnRootFolderClick = () => {
 OnRootFolderClick();
 
 const setItems = async (folderId, removeItemEListener = false) => {
-  const items = await fetchFolderItems(folderId);
-  if (!items) return;
+  const items = await FetchFolderItems(folderId);
+  if (!items) return false;
 
-  if (lastId === 0) VaultFileList.empty();
+  if (LastId === 0) VaultFileList.empty();
 
   items.forEach((item) => {
     VaultFileList.append(
@@ -117,36 +86,32 @@ const setItems = async (folderId, removeItemEListener = false) => {
   });
 
   OnItemClick(removeItemEListener);
+  return true;
 };
 
-const fetchFolderItems = async (folderId, reset = true) => {
-  try {
-    if (reset) lastId = 0;
-    const request = await RequestHandler({ url: `/vault/vaultitems/${folderId}?llastId=${lastId}`, method: "GET" });
-    if (request.success) {
-      return request?.data || [];
-    }
-    return null;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-};
-
-const checkQueryForFolder = async () => {
+//Check query params and set folder items if query param is present
+(async () => {
   const url = new URL(window.location.href);
   const lastParam = url.pathname.split("/").pop();
+
   if (lastParam === "home") return;
   const folderId = lastParam;
+  window.currentFolderId = folderId;
 
-  const folder = await fetchFolderItems(folderId);
-  if (!folder) return;
-  isFolder = folder[0].isFolder;
+  if ((await setItems(folderId)) === false) return;
 
-  setItems(folderId);
-};
+  //Ckeck current folder and set path
+  const folder = document.getElementById(`root-folder-${folderId}`);
+  if (folder) {
+    CurrentFolder && (CurrentFolder.style = "");
+    folder.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
+    CurrentFolder = folder;
+    setFilePath(folderId, folder.innerText);
+  }
+})();
 
 const showListViwer = () => {
   VaultFileViewer.hide();
+  VaultItemPemrmissions.hide();
   VaultFileList.show();
 };

@@ -28,11 +28,11 @@ const onSetToken = () => {
   DisplayModal({
     content: `
        <div class="mb-3">
-          <label for="token" class="form-label">Enter your token</label>
+          <label for="token" class="form-label">Enter your key</label>
           <input type="password" class="form-control" id="verify-token" name="token" required maxlength="64">
         </div>
         <div style="display:none;" id="decryptError" class="mt-2">
-          Token verification failed. Please try again
+          Key verification failed. Please try again
         </div>
       `,
     buttonText: "Unlock",

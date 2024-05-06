@@ -2,16 +2,12 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CipherDrop.Models;
 using CipherDrop.Data;
-
-using CipherDrop.Utils;
+using CipherDrop.Services;
 
 namespace CipherDrop.Controllers;
 
-public class AdminController(ILogger<DashboardController> logger,CipherDropContext context,AdminSettingsService adminSettingsService ) : Controller
+public class AdminController(CipherDropContext context,AdminSettingsService adminSettingsService ) : Controller
 {
-    private readonly ILogger<DashboardController> _logger = logger;
-
-
     public async Task<IActionResult> Setup()
     {
         if (IsAdmin() == false || await IsAdminSettingsSet() == true)
@@ -32,15 +28,13 @@ public class AdminController(ILogger<DashboardController> logger,CipherDropConte
 
         if (model.EncyptionTestText != null && model.EncyptionTestText.Length > 0)
         {
-
             var adminSettings = new AdminSettings
             {
                 EncyptionTestText = model.EncyptionTestText,
                 KeyEnd  = model.KeyEnd
             };
 
-            context.AdminSettings.Add(adminSettings);
-            await context.SaveChangesAsync();
+            await adminSettingsService.SaveAdminSettingsAsync(context, adminSettings);
             return RedirectToAction("Index", "Dashboard");
         }
         return View(model);
@@ -58,7 +52,7 @@ public class AdminController(ILogger<DashboardController> logger,CipherDropConte
     private async Task<bool> IsAdminSettingsSet()
     {
          //Check if admin settings have already been set
-        var adminSettings = await adminSettingsService.GetAdminSettings(context);
+        var adminSettings = await adminSettingsService.GetAdminSettingsAsync(context);
         if (adminSettings != null)
         {
             return true;

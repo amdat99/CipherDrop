@@ -1,105 +1,171 @@
-
 @{
-    ViewData["Title"] = "Vault";
+ViewData["Title"] = "Vault";
+var PermissionTabs = new List<string>{ "Permissions" , "View", "Edit", "Delete" };
 }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="~/js/auth.js" asp-append-version="true"></script>
 <script>
-    CheckAuth();
+   CheckAuth();
 </script>
-
 <link rel="stylesheet" href="~/css/vault.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/tiny.css" asp-append-version="true" />
+<div class="container mt-4">
+<div class="row">
+<div class="col-lg-3">
+   <!-- Left Sidebar for Folders -->
+   <div class="card folder-view">
+      <div class="d-flex justify-content-between align-items-center p-3">
+         <h5 class="card-title">Folders</h5>
+         <button type="button" class="btn btn-primary btn-sm bg-dark text-white" id="addRootFolder">
+         <i class="bi bi-folder-plus"></i> Add Folder
+         </button>
+      </div>
+      <input type="text" id="folder-search" class="ml-3 mr-3 border-0 bg-transparent mx-3 mb-1 text-white folder-search"
+         placeholder="Search Folders" >
+      <div class="vault-folder-list p-3">
+         @foreach (var folder in Model)
+         {
+         <div id="root-folder-@folder.Id" class="vault-root-folder">📁@folder.Reference</div>
+         }
+      </div>
+   </div>
+</div>
+<div class="col-lg-9">
+   <!-- Middle Content for Files -->
+   <div class="card file-view">
+      <!-- Tabs -->
+      <ul class="nav vault-tabs">
+         <li class="nav-item">
+            <a class="nav-link vault-tab active " id="tab-link-0" data-toggle="tab" href="#">Files</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="tab-add-item" data-toggle="tab">+</a>
+         </li>
+      </ul>
+      <!-- Tab Content -->
+      <div class="tab-content">
+         <!-- Files Tab -->
+         <div class="tab-pane fade show active" id="tab-0">
+            <div class="card-header d-flex justify-content-between align-items-center p-3">
+               <div id="file-path">Files</div>
+               <div id=folder-actions class="d-flex flex-row" style="display:none">
+                  <input type="text" id="item-search" class="ml-3 mr-3 border-0 bg-dark mt-1 mx-3 mb-1 text-white" placeholder="Search...">
+                  <div class="dropdown">
+                     <button id="vault-add-item" class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                     <i class="bi bi-file-earmark-plus"></i> Add Item
+                     </button>
+                     <ul class="dropdown-menu" aria-labelledby="vault-add-item">
+                        <li><button id="add-default-item" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit your content as a secure note">Default Item</button></li>
+                        <li><button id="add-sub-folder" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a subfolder to the current folder">Subfolder</button></li>
+                        <li><a class="dropdown-item" href="#">Requestable Item</a></li>
+                        <li><a class="dropdown-item" href="#">Api Item</a></li>
+                        <li><a class="dropdown-item" href="#">Attachment Only</a></li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+            <div class="card-body">
+               <div id="vault-file-list"></div>
+               <div id="file-viewer" class="file-viewer" style="display:none">
+                  <div class="d-flex justify-content-between align-items-center">
+                     <div class="d-flex flex-row w-100">
+                        <input type="text" id="file-viewer-reference" class="form-control border-0 bg-transparent" placeholder="File Name" style="color: white;">                                 
+                        <div class="d-flex flex-row item-actions">
+                           <span id="permissions-btn" class="btn text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Permissions">P</span>
+                        </div>
+                     </div>
+                  </div>
+                  <textarea id="file-viewer-content" class="form-control mt-3" rows="10" placeholder=""></textarea>
+               </div>
+               <div id="item-permissions" style="display:none">
+                  <div class="d-flex justify-content-between align-items-center">
+                     <ul class="nav vault-tabs">
+                        @foreach (var tab in PermissionTabs)
+                        {
+                        <li class="nav-item">
+                           <a class="nav-link @if (tab == "Permissions") { <text>active</text> }" id="tab-link-@tab" data-toggle="tab" href="#">@tab</a>
+                        </li>
+                        }
+                     </ul>
+                     <button id="close-permissions" class="btn btn-primary btn-sm bg-dark text-white">X</button>
+                  </div>
+                  <div class="tab-content mt-10" style="margin-top: 40px;">
+                     <div class="tab-pane  show active" id="vault-permissions" role="tabpanel" aria-labelledby="view-tab">                          
+                        <div class="card-header p-3">                      
+                            <p id="permissions-title" class="h5 mb-3">Default Restrictions</p>
+                             <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <label for="IsViewRestricted" class="form-label">Is View Restricted</label>
+                                    <input type="checkbox" class="form-check-input" id="IsViewRestricted" name="IsViewRestricted"/>
+                                    <p class="text-muted">Do you want to restrict the users who are able to view this item?
+                                </div>
+                                <div style="padding-left: 30px;">
+                                    <label for="IsEditRestricted" class="form-label">Is Edit Restricted</label>
+                                    <input type="checkbox" class="form-check-input" id="IsEditRestricted" name="IsEditRestricted"/>
+                                    <p class="text-muted">Do you want to restrict the users who are able to edit this item?</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="user-permissions" class="card-header mt-5">
+                            <p  class="h5 mb-3">User Permissions</p>
+                            <div class="d-flex justify-content-between">
+                                <input type="text" id="user-search" class=" mr-3 bg-dark mt-1 mb-1 text-white form-control" placeholder="Find Users" style="max-height: 32px; max-width: 250px;"> 
+                                <button id="user-permissions-add-user" class="btn btn-primary btn-sm bg-dark text-white text-white h-fit" style="max-height: 32px;"> Add User </button>  
+                            </div>
+                            <table class="table table-dark">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check" id="user-permission-1" name="user-permission-1"/></td>
+                                        <td>John Doe</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Role : View
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                                    <li><a class="dropdown-item" href="#">View
+                                                                                                            <p class="text-muted">Users will only have read access to this item.</p>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-3">
-            <!-- Left Sidebar for Folders -->
-            <div class="card folder-view">
-                <div class="d-flex justify-content-between align-items-center p-3">
-                    <h5 class="card-title">Folders</h5>
-                    <button type="button" class="btn btn-primary btn-sm bg-dark text-white" id="addRootFolder">
-                        <i class="bi bi-folder-plus"></i> Add Folder
-                    </button>
-                </div>
-                <input type="text" id="folder-search" class="ml-3 mr-3 border-0 bg-transparent mx-3 mb-1 text-white"
-                 placeholder="Search Folders" >
-                <div class="vault-folder-list p-3">
-                    @foreach (var folder in Model)
-                    {
-                        <div id="root-folder-@folder.Id" class="vault-root-folder">📁@folder.Reference</div>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-9">
-            <!-- Middle Content for Files -->
-            <div class="card file-view">
-                <div class="card-header d-flex justify-content-between align-items-center p-3">
-                    <div id="file-path">Files</div>
-                    <div id=folder-actions class="d-flex flex-row" style="display:none">
-                        <input type="text" id="item-search" class="ml-3 mr-3 border-0 bg-dark mt-1 mx-3 mb-1 text-white" placeholder="Search..." >
-                        <div class="dropdown">
-                            <button id="vault-add-item" class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button"  data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-file-earmark-plus"></i> Add Item
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="vault-add-item">
-                                <li><button id="add-default-item" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit your content as a secure note">Add Default Item</button></li>
-                                <li><button id="add-sub-folder" class="dropdown-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Add a subfolder to the current folder">Add Subfolder</button></li>
-                                <li><a class="dropdown-item" href="#">Requestable Item</a></li>
-                                <li><a class="dropdown-item" href="#">Api Item</a></li>
-                                <li><a class="dropdown-item" href="#">Attachment Only</a></li>
-                            </ul>
+                                                    </a>
+                                                    </li>
+                                                    <li><a class="dropdown-item" href="#">Edit</a></li>
+                                                    <li><a class="dropdown-item" href="#">Manage</a></li>
+                                                </ul>
+                                                <button class="btn btn-primary btn-sm bg-dark text-white ml-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove User">Remove</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id="vault-file-list"></div>
-                    <div id="file-viewer" class="file-viewer" style="display:none">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <input type="text" id="file-viewer-reference" class="form-control border-0 bg-transparent" placeholder="File Name" style="color: white">
-                        </div>
-                        <textarea id="file-viewer-content" class="form-control mt-3" rows="10" placeholder=""></textarea>
-                    </div>
-                </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="tab-pane fade" id="add-item">
+               </div>
             </div>
-        </div>
-    </div>
-    <input type="hidden" id="RequestVerificationToken" name="RequestVerificationToken" value='@Html.AntiForgeryToken()'>
+         </div>
+      </div>
+   </div>
 </div>
 @section Scripts {    
-    <script src="~/lib/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" ></script>
-    <script src="~/lib/tinymce/js/tinymce/themes/silver/theme.min.js"></script>
-    <script src="~/js/vault/vaultVars.js" asp-append-version="true"></script>
-    <script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
-    <script src="~/js/vault/vault.js" asp-append-version="true"></script>    
-    <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
-    <script type="text/javascript">
-        tinymce.init({
-            selector: '#file-viewer-content',
-            license_key: 'gpl',
-            height: '60vh',
-            content_css : "/css/tiny.css",
-            promotion: false,
-            branding: false,
-            highlight_on_focus: false,
-            menubar: 'edit view insert format tools table tc',
-            contextmenu: 'undo redo copy | inserttable format | cell row column deletetable | help',
-            powerpaste_word_import: 'clean',
-            powerpaste_html_import: 'clean',
-            powerpaste_allow_local_images: true,
-            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
-            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | table media pageembed | removeformat fullscreen',
-            setup: function (editor) {
-                editor.on('change', function (e) {
-                    OnVauleChange(e);
-                });
-                editor.on('input', function (e) {
-                    OnVauleChange(e);
-                });
-            }
-            });
-            //Add tooltips
-            InitialiseTooltips();
-    </script>
+<script src="~/lib/tinymce/js/tinymce/tinymce.min.js" referrerpolicy="origin" ></script>
+<script src="~/lib/tinymce/js/tinymce/themes/silver/theme.min.js"></script>
+<script src="~/js/vault/vaultShared.js" asp-append-version="true"></script>
+<script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
+<script src="~/js/vault/vault.js" asp-append-version="true"></script>    
+<script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
+<script src="~/js/vault/vaultItemPermissions.js" asp-append-version="true"></script>
+<script src="~/js/vault/vaultTiny.js" asp-append-version="true"></script> 
+<script type="text/javascript">
+   //Add tooltips
+   InitialiseTooltips();
+</script>
 }

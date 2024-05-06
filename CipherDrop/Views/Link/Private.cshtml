@@ -56,11 +56,9 @@
 @section Scripts {
     <script type="text/javascript">
             const value = document.getElementById('CipherValue')
-            console.log(value.value)
            
            if(value.value){
                 const decrypted = CryptoJS.AES.decrypt(value.value, '@TempData["Password"]').toString(CryptoJS.enc.Utf8);
-                console.log(decrypted)
                 value.value = decrypted;
                 value.style.display = 'block';
                 document.querySelector('.loader').style.display = 'none';

@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 
+namespace CipherDrop.Utils;
 
-namespace CipherDrop.Utils.PasswordUtils
-{
     public static class PasswordUtils
     {
         public static bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
@@ -20,4 +19,3 @@ namespace CipherDrop.Utils.PasswordUtils
                 .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
     }
-}

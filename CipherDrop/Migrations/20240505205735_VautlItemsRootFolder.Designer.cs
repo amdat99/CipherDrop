@@ -3,6 +3,7 @@ using System;
 using CipherDrop.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CipherDrop.Migrations
 {
     [DbContext(typeof(CipherDropContext))]
-    partial class CipherDropContextModelSnapshot : ModelSnapshot
+    [Migration("20240505205735_VautlItemsRootFolder")]
+    partial class VautlItemsRootFolder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -246,7 +249,7 @@ namespace CipherDrop.Migrations
                     b.ToTable("SharedCipher");
                 });
 
-            modelBuilder.Entity("CipherDrop.Models.SharedVaultItem", b =>
+            modelBuilder.Entity("CipherDrop.Models.SharedVaultItemView", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -255,13 +258,13 @@ namespace CipherDrop.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("TeamId")
+                    b.Property<int>("TeamId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("VaultItemId")
+                    b.Property<int>("VaultItemId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -272,7 +275,7 @@ namespace CipherDrop.Migrations
 
                     b.HasIndex("VaultItemId", "UserId");
 
-                    b.ToTable("SharedVaultItem");
+                    b.ToTable("SharedVaultItemView");
                 });
 
             modelBuilder.Entity("CipherDrop.Models.Team", b =>
@@ -613,19 +616,25 @@ namespace CipherDrop.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CipherDrop.Models.SharedVaultItem", b =>
+            modelBuilder.Entity("CipherDrop.Models.SharedVaultItemView", b =>
                 {
                     b.HasOne("CipherDrop.Models.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("TeamId");
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CipherDrop.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("CipherDrop.Models.VaultItem", "VaultItem")
                         .WithMany()
-                        .HasForeignKey("VaultItemId");
+                        .HasForeignKey("VaultItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Team");
 

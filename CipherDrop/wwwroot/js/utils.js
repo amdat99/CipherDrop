@@ -28,6 +28,9 @@ const RequestHandler = async ({ method, url, body }) => {
 
   try {
     const request = await fetch(url, params);
+    if (request.status === 401) {
+      window.location.href = "/login";
+    }
     const data = await request.json();
     return data;
   } catch (error) {
@@ -46,13 +49,13 @@ const RequestHandler = async ({ method, url, body }) => {
  * @param {boolean} [backdropClose] - Whether to close the modal when the backdrop is clicked
  * @returns {void}
  */
-const DisplayModal = ({ content, minWidth, maxWidth = "800px", buttonText, submitFunction, closeModalFunction = null, backdropClose = true }) => {
+const DisplayModal = ({ content, minWidth = "300px", maxWidth = "800px", buttonText, submitFunction, closeModalFunction = null, backdropClose = true }) => {
   dialog = document.createElement("dialog");
   modalbackdrop = document.createElement("div");
   modalbackdrop.classList.add("modal-backdrop");
   document.body.appendChild(modalbackdrop);
   dialog.innerHTML = `
-  <div class="card p-2" style="width: ${minWidth || "300px"}; max-width: ${maxWidth}">
+  <div class="card p-2" style="width: ${minWidth}; max-width: ${maxWidth}">
     <form class="card-body" id="modal-form">
         ${content}  
       <div class="d-grid mt-4">
