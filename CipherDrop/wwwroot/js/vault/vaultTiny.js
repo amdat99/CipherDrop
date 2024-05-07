@@ -1,7 +1,7 @@
 tinymce.init({
   selector: "#file-viewer-content",
   license_key: "gpl",
-  height: "60vh",
+  height: $(".file-view").height() - 173 + "px",
   content_css: "/css/tiny.css",
   promotion: false,
   branding: false,
@@ -42,3 +42,7 @@ tinymce.init({
     });
   },
 });
+
+setTimeout(() => {
+  $(".tox-statusbar__help-text").css("visibility", "hidden");
+}, 1000);

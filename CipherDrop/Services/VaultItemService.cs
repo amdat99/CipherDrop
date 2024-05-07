@@ -49,7 +49,7 @@ namespace CipherDrop.Services;
         {
             var item = new VaultItem
             {
-                Reference = jsonData.Reference,
+                Reference = EncryptionUtils.Encrypt(jsonData.Value),
                 Value = EncryptionUtils.Encrypt(jsonData.Value),
                 FolderId = jsonData.FolderId,
                 IsFolder = jsonData.IsFolder,
@@ -78,13 +78,14 @@ namespace CipherDrop.Services;
     public static async Task UpdateItemAsync(CipherDropContext context, VaultItem jsonData, Session? session)
     {
         jsonData.Value = EncryptionUtils.Encrypt(jsonData.Value);
+        jsonData.Reference = EncryptionUtils.Encrypt(jsonData.Reference);
         context.VaultItem.Update(jsonData);   
         await ActivityService.AddActivityAsync("Vault", jsonData.Id, "Update item", jsonData.IsFolder ? "Folder" : "Item", session , context);
     }
 
     public static async Task UpdateItemReferenceAsync(CipherDropContext context, VaultItem jsonData, Session? session)
     {
-        context.VaultItem.FromSql($"UPDATE VaultItem SET Reference = '{jsonData.Reference}' WHERE Id = {jsonData.Id}");
+        context.VaultItem.FromSql($"UPDATE VaultItem SET Reference = '{EncryptionUtils.Encrypt(jsonData.Reference)}' WHERE Id = {jsonData.Id}");
         await ActivityService.AddActivityAsync("Vault", jsonData.Id, "Update item", jsonData.IsFolder ? "Folder" : "Item", session, context);
     }   
     public static async Task DeleteItem(CipherDropContext context, int id, Session? session)

@@ -11,7 +11,6 @@ let lastString = "";
  */
 const OnVauleChange = (e) => {
   let val = e?.level?.content || e?.target?.innerHTML;
-  console.log(val);
   if (timeout) clearTimeout(timeout);
   timeout = setTimeout(() => {
     if (val === lastString) return;
@@ -34,41 +33,42 @@ const OnItemClick = (removeEventListenerFirst = false) => {
 
 const setItem = (item) => {
   item.data.value = CryptoJS.AES.decrypt(item.data.value, sessionStorage.getItem("Token") + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
-  CurrentItem = item.data;
+  ItemContent[CurrentTabIndex].CurrentItem = item.data;
   AdminSettings = item.aSettings;
   //set values
   fileViewerReference.val(item.data.reference);
   fileViewerReference.text(item.data.reference);
   tinymce.get("file-viewer-content").setContent(item.data.value);
 
-  VaultFileList.hide();
+  ItemContent[CurrentTabIndex].ListEl.hide();
   VaultFileViewer.show();
+  tinymce.activeEditor.focus();
 };
 
 onChangeReference = () => {
   fileViewerReference.on("input", function () {
     if (referenceTimeout) clearTimeout(referenceTimeout);
     referenceTimeout = setTimeout(() => {
-      CurrentItem.reference = this.value;
-      updateItem(CurrentItem);
+      ItemContent[CurrentTabIndex].CurrentItem.reference = this.value;
+      updateItem(ItemContent[CurrentTabIndex].CurrentItem);
     }, 1000);
   });
 };
 
 const updateItem = async (value) => {
   if (loading) return;
-  const tempItem = { ...CurrentItem };
+  const tempItem = { ...ItemContent[CurrentTabIndex].CurrentItem };
 
   //encrypt value
   tempItem.value = CryptoJS.AES.encrypt(value, sessionStorage.getItem("Token") + AdminSettings.keyEnd).toString();
 
   loading = true;
-  const request = await RequestHandler({ url: `/vault/updateitem/${CurrentItem.id}`, method: "PUT", body: tempItem });
+  const request = await RequestHandler({ url: `/vault/updateitem/${ItemContent[CurrentTabIndex].CurrentItem.id}`, method: "PUT", body: tempItem });
   loading = false;
   if (request.success) {
-    CurrentItem = tempItem;
-    CurrentItem.value = value;
-    CurrentItem.updatedAt = new Date();
+    ItemContent[CurrentTabIndex].CurrentItem = tempItem;
+    ItemContent[CurrentTabIndex].CurrentItem.value = value;
+    ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
   } else {
     DisplayToast({ message: "An error occured", type: "danger" });
   }

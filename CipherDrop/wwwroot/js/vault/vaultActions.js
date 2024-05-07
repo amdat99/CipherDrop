@@ -14,7 +14,7 @@ $("#addRootFolder").on("click", function () {
 // Add add default item handler
 VaultAddItemBtn.off("click");
 VaultAddItemBtn.on("click", function () {
-  if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
+  if (!ItemContent[CurrentTabIndex].CurrentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
   DisplayModal({
     content: `
       <div class="mb-3">
@@ -23,14 +23,14 @@ VaultAddItemBtn.on("click", function () {
       </div>
       `,
     buttonText: "Add Item",
-    submitFunction: () => AddItem(window.currentFolderId),
+    submitFunction: () => AddItem(ItemContent[CurrentTabIndex].CurrentFolderId),
   });
 });
 
 //Add add subfolder handler
 VaultAddSubFolderBtn.off("click");
 VaultAddSubFolderBtn.on("click", function () {
-  if (!window.currentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
+  if (!ItemContent[CurrentTabIndex].CurrentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
   DisplayModal({
     content: `
       <div class="mb-3">
@@ -39,8 +39,17 @@ VaultAddSubFolderBtn.on("click", function () {
       </div>
       `,
     buttonText: "Add Sub Folder",
-    submitFunction: () => AddSubfolder(window.currentFolderId),
+    submitFunction: () => AddSubfolder(ItemContent[CurrentTabIndex].CurrentFolderId),
   });
+});
+
+$("#tab-add-item").on("click", function () {
+  const id = Math.random();
+  const newFileList = $(`<div id="vault-file-list-${id}"></div>`);
+  ItemContent.push({ Id: Math.random(), ListEl: newFileList, CurrentItem: null, CurrentFolderId: 0, LastId: 0, CurrentSubFolderId: 0 });
+  VaultFileList.append(newFileList);
+
+  CurrentTabIndex = ItemContent.length - 1;
 });
 
 const addRootFolder = async () => {
@@ -50,7 +59,7 @@ const addRootFolder = async () => {
   if (request.success) {
     CloseModal();
 
-    VaultFolderList.append(` <div id="root-folder-${request.id}" class="vault-root-folder">${FolderName}</div>`);
+    VaultFolderList.append(` <div id="root-folder-${request.id}" class="vault-root-folder card-offset-hover card-offset">📁 ${FolderName}</div>`);
 
     //remove event listener for folder click first and then add it again with the new folder
     $(".vault-root-folder").off("click");

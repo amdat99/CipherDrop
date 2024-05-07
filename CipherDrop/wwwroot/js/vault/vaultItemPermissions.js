@@ -9,16 +9,15 @@ let permissionsModel = {
 };
 
 $("#permissions-btn").on("click", function () {
-  if (!CurrentItem) return DisplayToast({ message: "Please select an item to view permissions", type: "danger" });
+  if (!ItemContent[CurrentTabIndex].CurrentItem) return DisplayToast({ message: "Please select an item to view permissions", type: "danger" });
 
   permissionsModel = {
-    id: CurrentItem.id,
-    folderId: CurrentItem.folderId,
-    rootFolderId: CurrentItem.rootFolderId,
-    isViewRestricted: CurrentItem.isViewRestricted,
-    isEditRestricted: CurrentItem.isEditRestricted,
-    isDeleteRestricted: CurrentItem.isDeleteRestricted,
-    isShareRestricted: CurrentItem.isShareRestricted,
+    id: ItemContent[CurrentTabIndex].CurrentItem.id,
+    folderId: ItemContent[CurrentTabIndex].CurrentItem.folderId,
+    rootFolderId: ItemContent[CurrentTabIndex].CurrentItem.rootFolderId,
+    isViewRestricted: ItemContent[CurrentTabIndex].CurrentItem.isViewRestricted,
+    isEditRestricted: ItemContent[CurrentTabIndex].CurrentItem.isEditRestricted,
+    isDeleteRestricted: ItemContent[CurrentTabIndex].CurrentItem.isDeleteRestricted,
   };
 
   VaultItemPemrmissions.show();

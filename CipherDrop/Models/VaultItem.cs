@@ -17,7 +17,7 @@ public class VaultItem
     public int? RootFolderId { get; set; }
 
     [MaxLength(60)]
-    public string? Reference { get; set; }
+    public string Reference { get; set; } = "";
 
     [Required]
     [MaxLength(200000)]

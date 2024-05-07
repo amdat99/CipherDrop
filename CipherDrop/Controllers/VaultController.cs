@@ -17,27 +17,50 @@ public class VaultController(CipherDropContext context) : Controller
     [HttpGet]
     public IActionResult RootFolders()
     {
-        string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
-        var folders = VaultFolderService.GetPaginatedVaultRootFolders(context, lastId);
-        return Json(new { success = true, data = folders });
+        try 
+        {
+            string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
+            var folders = VaultFolderService.GetPaginatedVaultRootFolders(context, lastId);
+            return Json(new { success = true, data = folders });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting folders" });
+        }
     }
 
     public IActionResult VaultItems(int id)
     {
-        string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
-        // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId)
-        var vaultItems = VaultItemService.GetPaginatedVaultItems(context, id, lastId, (HttpContext.Items["Session"] as Session).UserId);
-        return Json( new { success = true, data = vaultItems });
+        try
+        {
+            string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
+            var vaultItems = VaultItemService.GetPaginatedVaultItems(context, id, lastId, (HttpContext.Items["Session"] as Session).UserId);
+            return Json( new { success = true, data = vaultItems });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting items" });
+        }
     }
 
     public IActionResult VaultItem(int id)
     {
-        // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId)
-         var vaultItem = VaultItemService.GetVaultItem(context, id, (HttpContext.Items["Session"] as Session).UserId);
-        if (vaultItem == null) return Json(new { success = false, message = "VaultItem not found" });
-        // Decrypt the Value
-        vaultItem.Value = EncryptionUtils.Decrypt(vaultItem.Value);
-        return Json(new { success = true, data = vaultItem, aSettings = HttpContext.Items["AdminSettings"] as AdminSettings });
+        try 
+        {
+            var vaultItem = VaultItemService.GetVaultItem(context, id, (HttpContext.Items["Session"] as Session).UserId);
+            if (vaultItem == null) return StatusCode(404, new { success = false, message = "Item not found" });
+            // Decrypt the Value and Reference
+            vaultItem.Value = EncryptionUtils.Decrypt(vaultItem.Value);
+            vaultItem.Reference = EncryptionUtils.Decrypt(vaultItem.Reference);
+            return Json(new { success = true, data = vaultItem, aSettings = HttpContext.Items["AdminSettings"] as AdminSettings });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting item" });
+        }
     }
 
     [HttpPost]
@@ -46,7 +69,7 @@ public class VaultController(CipherDropContext context) : Controller
     {
         if (!ModelState.IsValid)
         {
-            return Json(new { success = false, message = "Invalid input" });
+            return StatusCode(400, new { success = false, message = "Invalid input" });
         }
         try 
         {
@@ -55,7 +78,7 @@ public class VaultController(CipherDropContext context) : Controller
         }
         catch (Exception e)
         {
-            return Json(new { success = false, message = e.Message });
+            return StatusCode(500, new { success = false, message = "Error adding folder" });
         }
     }
 
@@ -65,9 +88,8 @@ public class VaultController(CipherDropContext context) : Controller
     {
         if (!ModelState.IsValid)
         {
-            return Json(new { success = false, message = "Invalid input" });
+            return StatusCode(400, new { success = false, message = "Invalid input" });
         }
-        
         using var transaction = await context.Database.BeginTransactionAsync();
         try 
         {
@@ -79,7 +101,7 @@ public class VaultController(CipherDropContext context) : Controller
         {
             await transaction.RollbackAsync();
             Console.WriteLine(e.Message);
-            return Json(new { success = false, message = "Error adding item" });
+            return StatusCode(500, new { success = false, message = "Error adding item" });
         }
     }
 
@@ -89,9 +111,8 @@ public class VaultController(CipherDropContext context) : Controller
     {
         if (!ModelState.IsValid)
         {
-            return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+            return StatusCode(400, new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
         }
-
         try 
         {
             await VaultItemService.UpdateItemAsync(context, jsonData, HttpContext.Items["Session"] as Session);
@@ -100,10 +121,12 @@ public class VaultController(CipherDropContext context) : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return Json(new { success = false, message = "Error updating item" });
+            return StatusCode(500, new { success = false, message = "Error updating item" });
         }
     }
-
+    
+    [HttpPut]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateItemReference( [FromBody] VaultItem jsonData)
     {
         try 
@@ -114,7 +137,25 @@ public class VaultController(CipherDropContext context) : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return Json(new { success = false, message = "Error updating item" });
+            return StatusCode(500, new { success = false, message = "Error updating item" });
+        }
+    }
+
+    public async Task<IActionResult> UserPermissions(int id)
+    {
+        try 
+        {
+            var permissions = await VaultItemPermissionsService.GetPaginatedItemUserPermissions(context, id, Request.Query["lastId"].FirstOrDefault() ?? "0", (HttpContext.Items["Session"] as Session).UserId);
+            if(permissions == null)
+            {
+                return StatusCode(403, new { success = false, message = "Unauthorized" });
+            }
+            return Json(new { success = true });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting permissions" });
         }
     }
     

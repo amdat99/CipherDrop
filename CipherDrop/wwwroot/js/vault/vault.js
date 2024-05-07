@@ -11,17 +11,19 @@ VaultFolderList.on("scroll", function () {
       //get the last folder id
       const lastFolder = $(".vault-root-folder").last()[0];
       if (!lastFolder) return;
-      LastId = lastFolder.id.split("-")[2];
+      ItemContent[CurrentTabIndex].LastId = lastFolder.id.split("-")[2];
 
       folderLoading = true;
-      const folders = await RequestHandler({ url: `/vault/rootfolders?lastId=${LastId}`, method: "GET" });
+      const folders = await RequestHandler({ url: `/vault/rootfolders?lastId=${ItemContent[CurrentTabIndex].LastId}`, method: "GET" });
       folderLoading = false;
       if (!folders?.data) return;
       else if (folders.data.length === 0) return (noMoreFolders = true);
 
+      let foldersHtml = "";
       folders.data.forEach((folder) => {
-        VaultFolderList.append(`<div id="root-folder-${folder.id}" class="vault-root-folder">${folder.reference}</div>`);
+        foldersHtml += `<div id="root-folder-${folder.id}" class="vault-root-folder card-offset-hover card-offset">📁 ${folder.reference}</div>`;
       });
+      VaultFolderList.append(foldersHtml);
 
       $(".vault-root-folder").off("click");
       OnRootFolderClick();
@@ -40,7 +42,7 @@ const setFilePath = (folderId, text) => {
     showListViwer();
 
     //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
-    if (window.currentFolderId === folderId) return;
+    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return;
     setItems(folderId, true);
   });
 };
@@ -50,12 +52,12 @@ const OnRootFolderClick = () => {
     const folderId = this.id.split("-")[2];
     showListViwer();
     //Check if the folder is already selected if not set items for the folder
-    if (window?.currentFolderId === folderId) return VaultCurrentTab.html(CurrentFolder.innerText);
-    window.currentFolderId = folderId;
+    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return VaultCurrentTab.html(CurrentFolder.innerText);
+    ItemContent[CurrentTabIndex].CurrentFolderId = folderId;
 
     //Change style of selected folder
     CurrentFolder && (CurrentFolder.style = "");
-    this.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
+    this.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
     CurrentFolder = e.target;
 
     //Set folder path and and add listener to folder name in path
@@ -75,15 +77,20 @@ const setItems = async (folderId, removeItemEListener = false) => {
   const items = await FetchFolderItems(folderId);
   if (!items) return false;
 
-  if (LastId === 0) VaultFileList.empty();
+  if (ItemContent[CurrentTabIndex].LastId === 0) ItemContent[CurrentTabIndex].ListEl.empty();
+
+  let currentitems = "";
 
   items.forEach((item) => {
-    VaultFileList.append(
-      `<div id="item-${item.id}" class="vault-item p-3"><span>${item.isFolder ? "📁" : "📄"} ${item.reference}</span><span >${new Date(
-        item.updatedAt
-      ).toLocaleDateString()}</span></div>`
-    );
+    currentitems += `<div id="item-${item.id}" class="vault-item card-offset card-offset-hove p-3"><span>${item.isFolder ? "📁" : "📄"} ${
+      item.reference
+    }</span><span >${new Date(item.updatedAt).toLocaleDateString()}</span></div>`;
   });
+
+  ItemContent[CurrentTabIndex].ListEl.append(currentitems);
+
+  ItemContent[CurrentTabIndex].CurrentItem = null;
+  ItemContent[CurrentTabIndex].Items = items;
 
   OnItemClick(removeItemEListener);
   return true;
@@ -96,7 +103,7 @@ const setItems = async (folderId, removeItemEListener = false) => {
 
   if (lastParam === "home") return;
   const folderId = lastParam;
-  window.currentFolderId = folderId;
+  ItemContent[CurrentTabIndex].CurrentFolderId = folderId;
 
   if ((await setItems(folderId)) === false) return;
 
@@ -104,7 +111,7 @@ const setItems = async (folderId, removeItemEListener = false) => {
   const folder = document.getElementById(`root-folder-${folderId}`);
   if (folder) {
     CurrentFolder && (CurrentFolder.style = "");
-    folder.style = "background-color: #343a40; border : 1px solid var(--primary-color);";
+    folder.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
     CurrentFolder = folder;
     setFilePath(folderId, folder.innerText);
   }
@@ -113,5 +120,5 @@ const setItems = async (folderId, removeItemEListener = false) => {
 const showListViwer = () => {
   VaultFileViewer.hide();
   VaultItemPemrmissions.hide();
-  VaultFileList.show();
+  ItemContent[CurrentTabIndex].ListEl.show();
 };

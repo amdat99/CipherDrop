@@ -1,15 +1,14 @@
 #file-viewer-content {
   height: 55vh;
-  margin-top: 10px !important;
-  color: #fff !important;
-  border-color: transparent !important;
-  background-color: #343a40 !important;
+  margin-top: 0px !important;
+  color: #fff;
+  border-color: transparent;
 }
 
 #file-viewer-reference {
-  color: #fff !important;
-  border-color: transparent !important;
-  background-color: #343a40 !important;
+  color: #fff;
+  border-color: transparent;
+  background-color: var(--secondary-color) !important;
 }
 
 .file-view {
@@ -26,7 +25,7 @@
 
 .vault-folder-list {
   overflow-y: auto;
-  background: #212529d0;
+  background: var(--card-color);
 }
 
 @media screen and (max-width: 992px) {
@@ -65,19 +64,10 @@
 .vault-root-folder {
   padding: 5px;
   margin-bottom: 5px;
-  border-radius: 5px;
-  background-color: #343a4024;
-  cursor: pointer;
-  color: #fff;
-  transition: background-color 0.3s;
-  border: 1px solid transparent;
-  box-shadow: 0 8px 8px 0 #212529;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
 }
 
 .vault-root-folder:hover {
-  background-color: #343a40;
+  background-color: var(--secondary-color);
   transition: background-color 0.3s;
 }
 
@@ -86,16 +76,11 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  border-radius: 5px;
-  background-color: #212529;
   cursor: pointer;
-  color: #fff;
-  transition: background-color 0.3s;
-  border: 1px solid #343a40;
 }
 
 .vault-item:hover {
-  background-color: #343a40;
+  background-color: var(--secondary-color);
   transition: background-color 0.3s;
 }
 
@@ -115,7 +100,7 @@
   justify-content: center;
   align-items: center;
   margin-left: 10px;
-  background-color: #343a40 !important;
+  background-color: var(--secondary-color) !important;
 }
 
 .vault-tabs .nav-link {

@@ -5,7 +5,13 @@ namespace CipherDrop.Utils
 {
     public class EncryptionUtils()
     {
-        public static string? EncryptionKey { get; set; }
+        private static string? EncryptionKey { get; set; }
+
+        public static void SetEncryptionKey(string newkey)
+        {
+            EncryptionKey = newkey;
+        }
+        
         public static string Encrypt(string plainText, string? key = null)
         {
             using var aes = Aes.Create();

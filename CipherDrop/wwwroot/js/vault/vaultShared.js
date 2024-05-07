@@ -1,6 +1,6 @@
 //Shared elements
-const VaultFileList = $("#vault-file-list");
 const VaultFileViewer = $("#file-viewer");
+const VaultFileListContainer = $("#file-list-container");
 const VaultFolderList = $(".vault-folder-list");
 const VaultFolderActions = $("#vault-folder-actions");
 const VaultAddItemBtn = $("#add-default-item");
@@ -11,13 +11,11 @@ const VaultItemPemrmissions = $("#item-permissions");
 let VaultCurrentTab = $("#tab-link-0");
 
 //Shared vars
+let ItemContent = [{ id: 0, Items: [], CurrentItem: null, ListEl: $("#vault-file-list-0"), CurrentFolderId: 0, CurrentSubFolderId: 0, LastId: 0 }];
 let CurrentTabIndex = 0;
 let CurrentFolder = null;
-let CurrentItem = null;
-let LastId = 0;
 
 //Shared functions
-
 /**
  *
  * @param {*} folderId
@@ -26,8 +24,8 @@ let LastId = 0;
  */
 const FetchFolderItems = async (folderId, reset = true) => {
   try {
-    if (reset) LastId = 0;
-    const request = await RequestHandler({ url: `/vault/vaultitems/${folderId}?llastId=${LastId}`, method: "GET" });
+    if (reset) ItemContent[CurrentTabIndex].LastId = 0;
+    const request = await RequestHandler({ url: `/vault/vaultitems/${folderId}?lastId=${ItemContent[CurrentTabIndex].LastId}`, method: "GET" });
     if (request.success) {
       return request?.data || [];
     }
@@ -74,7 +72,7 @@ const AddItem = async (folderId) => {
   if (request.success) {
     CloseModal();
     //Add to top of the list
-    VaultFileList.prepend(
+    ItemContent[CurrentTabIndex].ListEl.prepend(
       `<div id="item-${request.id}" class="vault-item p-3"><span>📄 ${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
     );
     //Remove event listener for the items before setting again by passing true arg
@@ -100,7 +98,7 @@ const AddSubfolder = async (folderId) => {
   if (request.success) {
     CloseModal();
     //Add to top of the list
-    VaultFileList.prepend(
+    ItemContent[CurrentTabIndex].ListEl.prepend(
       `<div id="folder-${request.id}" class="vault-item p-3"><span>📁 ${folderName}</span><span >${new Date().toLocaleDateString()}</span></div>
       `
     );
