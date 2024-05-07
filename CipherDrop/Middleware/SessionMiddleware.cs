@@ -37,14 +37,14 @@ namespace CipherDrop.Middleware
                 {
                     //Remove the session cookie if it is invalid
                     context.Response.Cookies.Delete("session");
+                    context.Response.StatusCode = 401;
 
-                    //If get request, redirect to login page else return 401 unauthorized
+                    //If get request, redirect to login page
                     if (context.Request.Method == "GET")
                     {
                         context.Response.Redirect("/login");
                         return;
                     }
-                    context.Response.StatusCode = 401;
                     return;
                 }
 

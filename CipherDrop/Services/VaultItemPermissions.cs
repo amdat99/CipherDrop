@@ -10,7 +10,7 @@ namespace CipherDrop.Services;
 
             //Check if user has manage access to the item
             var sharedVaultItem = await context.SharedVaultItem
-                .Where(sv => sv.UserId == userId && sv.Role == "Manage")
+                .Where(svi => svi.UserId == userId && svi.Role == "Manage")
                 .FirstOrDefaultAsync();
                 
             if(sharedVaultItem == null)
@@ -19,26 +19,9 @@ namespace CipherDrop.Services;
             }
         
             return await context.SharedVaultItem
-                .Where(sv => sv.VaultItemId == id && sv.Id > int.Parse(lastId))
-                .OrderBy(sv => sv.Id)
+                .Where(svi => svi.VaultItemId == id && svi.Id > int.Parse(lastId))
+                .OrderBy(svi => svi.Id)
                 .Take(40)
                 .ToListAsync();
-        }
-        
-        public static async Task<int> AddFolderAsync(CipherDropContext context, string foldername , bool isRoot , Session? session)
-        {
-            var folder = new VaultFolder
-                {
-                    Reference = foldername,
-                    IsRoot = isRoot,
-                    UserId = session.UserId
-                };
-            context.VaultFolder.Add(folder);
-            await context.SaveChangesAsync(); 
-            if(isRoot == true)
-            {
-                await ActivityService.AddActivityAsync("Vault", folder.Id, "Create folder", "", session , context);
-            }
-            return folder.Id;
         }
 }

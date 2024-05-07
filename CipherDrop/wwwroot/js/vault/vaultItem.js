@@ -32,7 +32,10 @@ const OnItemClick = (removeEventListenerFirst = false) => {
 };
 
 const setItem = (item) => {
-  item.data.value = CryptoJS.AES.decrypt(item.data.value, sessionStorage.getItem("Token") + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+  const token = sessionStorage.getItem("Token");
+  item.data.value = CryptoJS.AES.decrypt(item.data.value, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+  item.data.reference = CryptoJS.AES.decrypt(item.data.reference, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+
   ItemContent[CurrentTabIndex].CurrentItem = item.data;
   AdminSettings = item.aSettings;
   //set values
@@ -59,8 +62,10 @@ const updateItem = async (value) => {
   if (loading) return;
   const tempItem = { ...ItemContent[CurrentTabIndex].CurrentItem };
 
-  //encrypt value
-  tempItem.value = CryptoJS.AES.encrypt(value, sessionStorage.getItem("Token") + AdminSettings.keyEnd).toString();
+  //encrypt value and reference
+  const token = sessionStorage.getItem("Token");
+  tempItem.value = CryptoJS.AES.encrypt(value, token + AdminSettings.keyEnd).toString();
+  tempItem.reference = CryptoJS.AES.encrypt(tempItem.reference, token + AdminSettings.keyEnd).toString();
 
   loading = true;
   const request = await RequestHandler({ url: `/vault/updateitem/${ItemContent[CurrentTabIndex].CurrentItem.id}`, method: "PUT", body: tempItem });
@@ -70,6 +75,7 @@ const updateItem = async (value) => {
     ItemContent[CurrentTabIndex].CurrentItem.value = value;
     ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
   } else {
-    DisplayToast({ message: "An error occured", type: "danger" });
+    if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
+    else DisplayToast({ message: "An error occured", type: "danger" });
   }
 };

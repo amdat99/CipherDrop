@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json.Serialization;
 
 namespace CipherDrop.Models;
 
@@ -16,7 +17,8 @@ public class VaultItem
     public VaultFolder? Folder { get; set; } 
     public int? RootFolderId { get; set; }
 
-    [MaxLength(60)]
+    [MaxLength(300 , ErrorMessage = "Item title is too long")]
+    [Required]
     public string Reference { get; set; } = "";
 
     [Required]

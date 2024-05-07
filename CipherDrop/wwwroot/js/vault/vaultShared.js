@@ -27,6 +27,7 @@ const FetchFolderItems = async (folderId, reset = true) => {
     if (reset) ItemContent[CurrentTabIndex].LastId = 0;
     const request = await RequestHandler({ url: `/vault/vaultitems/${folderId}?lastId=${ItemContent[CurrentTabIndex].LastId}`, method: "GET" });
     if (request.success) {
+      AdminSettings = request.aSettings;
       return request?.data || [];
     }
     return null;
@@ -63,17 +64,20 @@ const AddItem = async (folderId) => {
   const fileReference = $("#fileReference").val();
   let value = " ";
   if (!fileReference || !value) return;
-  //encrypt value
+  //encrypt the reference
   const token = sessionStorage.getItem("Token");
   const adminsettings = AdminSettings || (await FetchAdminSettings());
   if (!token || !adminsettings) return;
+  const encryptedReference = CryptoJS.AES.encrypt(fileReference, token + adminsettings.keyEnd).toString();
 
-  const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: fileReference, value, isFolder: false } });
+  const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: encryptedReference, value, isFolder: false } });
   if (request.success) {
     CloseModal();
     //Add to top of the list
     ItemContent[CurrentTabIndex].ListEl.prepend(
-      `<div id="item-${request.id}" class="vault-item p-3"><span>📄 ${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
+      `<div id="item-${
+        request.id
+      }" class="vault-item card-offset card-offset-hover p-3"><span>📄 ${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
     );
     //Remove event listener for the items before setting again by passing true arg
     OnItemClick(true);

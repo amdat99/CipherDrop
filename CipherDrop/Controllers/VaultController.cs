@@ -36,7 +36,7 @@ public class VaultController(CipherDropContext context) : Controller
         {
             string lastId = Request.Query["lastId"].FirstOrDefault() ?? "0";
             var vaultItems = VaultItemService.GetPaginatedVaultItems(context, id, lastId, (HttpContext.Items["Session"] as Session).UserId);
-            return Json( new { success = true, data = vaultItems });
+            return Json( new { success = true, data = vaultItems , aSettings = HttpContext.Items["AdminSettings"] as AdminSettings });
         }
         catch (Exception e)
         {

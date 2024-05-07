@@ -11,7 +11,7 @@ public class LoggedApiController() : Controller
     {
         try
         {
-            return Json(new { success = true, data = HttpContext.Items["AdminSettings"] });
+            return Json(HttpContext.Items["AdminSettings"]);
         }
         catch (Exception e)
         {

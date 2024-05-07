@@ -1,3 +1,5 @@
+let AdminSettings = null;
+
 /**
  * Handles local key verification and setting user values to local storage if data parameter is passed in
  * @param {object} data - The user data to set in local storage
@@ -55,8 +57,6 @@ const verifyToken = async () => {
     dialog.querySelector("#decryptError").style.display = "block";
   }
 };
-
-let AdminSettings = null;
 
 /**
  * Handles fetching admin settings and setting the value to the AdminSettings variable

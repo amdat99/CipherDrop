@@ -45,6 +45,18 @@ namespace CipherDrop.Data
                     .WithMany()
                     .HasForeignKey(vi => vi.FolderId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<SharedVaultItem>()
+                    .HasOne(svi => svi.VaultItem)
+                    .WithMany()
+                    .HasForeignKey(svi => svi.VaultItemId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<SharedVaultItem>()
+                    .HasOne(svi => svi.User)
+                    .WithMany()
+                    .HasForeignKey(svi => svi.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             }
     }
 }

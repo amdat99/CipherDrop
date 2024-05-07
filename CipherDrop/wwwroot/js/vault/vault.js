@@ -80,11 +80,16 @@ const setItems = async (folderId, removeItemEListener = false) => {
   if (ItemContent[CurrentTabIndex].LastId === 0) ItemContent[CurrentTabIndex].ListEl.empty();
 
   let currentitems = "";
+  const adminsettings = AdminSettings || (await FetchAdminSettings());
+  if (!adminsettings) return false;
+
+  const token = sessionStorage.getItem("Token");
 
   items.forEach((item) => {
-    currentitems += `<div id="item-${item.id}" class="vault-item card-offset card-offset-hove p-3"><span>${item.isFolder ? "📁" : "📄"} ${
-      item.reference
-    }</span><span >${new Date(item.updatedAt).toLocaleDateString()}</span></div>`;
+    currentitems += `<div id="item-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${item.isFolder ? "📁" : "📄"} ${CryptoJS.AES.decrypt(
+      item.reference,
+      token + adminsettings.keyEnd
+    ).toString(CryptoJS.enc.Utf8)}</span><span>${new Date(item.updatedAt).toLocaleDateString()}</span></div>`;
   });
 
   ItemContent[CurrentTabIndex].ListEl.append(currentitems);

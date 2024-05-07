@@ -10,8 +10,8 @@ namespace CipherDrop.Services;
         public static List<VaultItem?> GetPaginatedVaultItems(CipherDropContext context, int id, string lastId, int userId)
         {
             int lastItemId = int.Parse(lastId);
-            // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId)
-            return [.. context.VaultItem
+            // Get the VaultItem where the Id is equal to the id and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId) and decrypt the reference in all rows
+           return [.. context.VaultItem
                         .Where(vf => vf.FolderId == id && vf.Id > lastItemId &&
                                     (!vf.IsViewRestricted ||
                                     (vf.IsViewRestricted &&
@@ -20,13 +20,14 @@ namespace CipherDrop.Services;
                         .Select(vf => new VaultItem
                         {
                             Id = vf.Id,
-                            Reference = vf.Reference,
+                            Reference = EncryptionUtils.Decrypt(vf.Reference,null),
                             IsFolder = vf.IsFolder,
                             UserId = vf.UserId,
                             UpdatedAt = vf.UpdatedAt
                         })
                         .OrderByDescending(vf => vf.UpdatedAt)
                         .Take(50)];
+                
         }
 
         public static VaultItem? GetVaultItem(CipherDropContext context, int id, int userId)
@@ -49,7 +50,7 @@ namespace CipherDrop.Services;
         {
             var item = new VaultItem
             {
-                Reference = EncryptionUtils.Encrypt(jsonData.Value),
+                Reference = EncryptionUtils.Encrypt(jsonData.Reference),
                 Value = EncryptionUtils.Encrypt(jsonData.Value),
                 FolderId = jsonData.FolderId,
                 IsFolder = jsonData.IsFolder,
