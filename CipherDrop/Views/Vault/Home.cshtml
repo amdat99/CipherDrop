@@ -21,7 +21,7 @@
                         <i class="bi bi-folder-plus"></i> Add Folder
                     </button>
                 </div>
-                <input type="text" id="folder-search" class="ml-3 mr-3 border-0 bg-transparent mx-3 mb-1 text-white folder-search" placeholder="Search Folders">
+                <input type="text" id="folder-search" class="bg-dark mb-1 text-white form-control border-0 folder-search" placeholder="Search Folders" style="max-height: 33px; align-self: center; width: 90%;">
                 <div class="vault-folder-list p-3">
                     @foreach (var folder in Model)
                     {
@@ -35,18 +35,19 @@
             <div class="card file-view">
                 <!-- Tabs -->
                 <ul class="nav vault-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link vault-tab active " id="tab-link-0" data-toggle="tab" href="#">Files</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="tab-add-item" data-toggle="tab">+</a>
+                    <span class="nav-link vault-tab active " id="tab-link-0">Files</span>
+                    <li class="nav-item cursor-pointer " 
+                    id="tab-add-item">
+                        <button class=" bg-transparent text-white border-0 ml-5 btn btn-sm display-5 outline-none" id="tab-link-add-item" data-bs-toggle="tooltip" data-bs-placement="top" title="New Tab">
+                            +
+                        </button>
                     </li>
                 </ul>
                 <!-- Tab Content -->
                 <div class=" d-flex justify-content-between align-items-center p-3">
                     <div id="file-path">Files</div>
                     <div id=folder-actions class="d-flex flex-row" style="display:none">
-                        <input type="text" id="item-search" class="ml-3 mr-3 border-0 bg-transparent mt-1 mx-3 mb-1 text-white" placeholder="Search...">
+                        <input type="text" id="item-search" class="ml-3 mr-3 bg-dark  mb-1 text-white form-control border-0" placeholder="Search..." style="max-height: 33px; max-width: 250px; margin-right: 20px;">
                         <div class="dropdown">
                             <button id="vault-add-item" class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-file-earmark-plus"></i> Add Item
@@ -61,88 +62,61 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body" id="vault-file-list-container">
+                <div class="px-3" id="vault-file-list-container">
                     <div id="vault-file-list-0"></div>
                     <div id="file-viewer" class="file-viewer" style="display:none">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex flex-row w-100 mx-3">
+                            <div class="d-flex flex-row w-100">
                                 <input type="text" id="file-viewer-reference" class="form-control border-0 bg-transparent" placeholder="File Name" style="color: white;" maxlength="100" />
                                 <div class="d-flex flex-row item-actions">
                                     <span id="permissions-btn" class="btn text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Permissions">P</span>
                                 </div>
                             </div>
                         </div>
-                        <textarea id="file-viewer-content" class="form-control" rows="10" placeholder=""></textarea>
-                    </div>
-                    <div id="item-permissions" style="display:none">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <ul class="nav vault-tabs">
-                                @foreach (var tab in PermissionTabs)
-                                {
-                                <li class="nav-item">
-                                    <a class="nav-link @if (tab == "Permissions") { <text>active</text> }" id="tab-link-@tab" data-toggle="tab" href="#">@tab</a>
-                                </li>
-                                }
-                            </ul>
-                            <button id="close-permissions" class="btn btn-primary btn-sm bg-dark text-white">X</button>
-                        </div>
-                        <div class="tab-content mt-10" style="margin-top: 40px;">
-                            <div class="tab-pane show active" id="vault-permissions" role="tabpanel" aria-labelledby="view-tab">
-                                <div class="p-3 card-offset">
-                                    <p id="permissions-title" class="h5 mb-3">Default Restrictions</p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <label for="IsViewRestricted" class="form-label">Is View Restricted</label>
-                                            <input type="checkbox" class="form-check-input" id="IsViewRestricted" name="IsViewRestricted" />
-                                            <p class="text-muted">Do you want to restrict the users who are able to view this item?</p>
-                                        </div>
-                                        <div style="padding-left: 30px;">
-                                            <label for="IsEditRestricted" class="form-label">Is Edit Restricted</label>
-                                            <input type="checkbox" class="form-check-input" id="IsEditRestricted" name="IsEditRestricted" />
-                                            <p class="text-muted">Do you want to restrict the users who are able to edit this item?</p>
+                        <textarea id="file-viewer-content"  placeholder=""></textarea>
+                        <div id="item-permissions" style="display:none" class="mt-4 mx-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span></span>
+                                <button id="close-permissions" class="btn btn-primary btn-sm bg-dark text-white">X</button>
+                            </div>
+                            <div class="tab-content " style="margin-top: 25px;">
+                                <div class="tab-pane show active" id="vault-permissions" role="tabpanel" aria-labelledby="view-tab">
+                                    <div class="p-3 card-offset">
+                                        <p id="permissions-title" class="h5 mb-3">Default Restrictions</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <label for="IsViewRestricted" class="form-label">Is View Restricted</label>
+                                                <input type="checkbox" class="form-check-input" id="IsViewRestricted" name="IsViewRestricted" />
+                                                <p class="text-muted">Do you want to restrict the users who are able to view this item?</p>
+                                            </div>
+                                            <div style="padding-left: 30px;">
+                                                <label for="IsEditRestricted" class="form-label">Is Edit Restricted</label>
+                                                <input type="checkbox" class="form-check-input" id="IsEditRestricted" name="IsEditRestricted" />
+                                                <p class="text-muted">Do you want to restrict the users who are able to edit this item?</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div id="user-permissions" class="p-3 mt-5 card-offset">
-                                    <p class="h5 mb-3">User Permissions</p>
-                                    <div class="d-flex justify-content-between">
-                                        <input type="text" id="user-search" class="mr-3 bg-dark mt-1 mb-1 text-white form-control" placeholder="Find Users" style="max-height: 32px; max-width: 250px;">
-                                        <button id="user-permissions-add-user" class="btn btn-primary btn-sm bg-dark text-white h-fit" style="max-height: 32px;"> Add User </button>
+                                    <div id="user-permissions" class="p-3 mt-5 card-offset">
+                                        <p class="h5 mb-3">User Permissions</p>
+                                        <div class="d-flex justify-content-between">
+                                            <input type="text" id="user-search" class="mr-3 bg-dark mt-1 mb-1 text-white border-0 form-control" placeholder="Find Users" style="max-height: 32px; max-width: 250px;">
+                                            <button id="user-permissions-add-user" class="btn btn-primary btn-sm bg-dark text-white h-fit" style="max-height: 32px;"> Add User </button>
+                                        </div>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="user-permissions-table-body">
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col"></th>
-                                                <th scope="col"></th>
-                                                <th scope="col"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><input type="checkbox" class="form-check" id="user-permission-1" name="user-permission-1" /></td>
-                                                <td class="text-white">User 1</td>
-                                                <td>
-                                                    <div class="dropdown">
-                                                        <button class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            Role : View
-                                                        </button>
-                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                                            <li><a class="dropdown-item" href="#">View
-                                                                    <p class="text-muted">Users will only have read access to this item.</p>
-                                                                </a>
-                                                            </li>
-                                                            <li><a class="dropdown-item" href="#">Edit</a></li>
-                                                            <li><a class="dropdown-item" href="#">Manage</a></li>
-                                                        </ul>
-                                                        <button class="btn btn-primary btn-sm bg-dark text-white ml-3" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove User">Remove</button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
                                 </div>
                             </div>
-                        </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -158,6 +132,7 @@
     <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultItemPermissions.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultTiny.js" asp-append-version="true"></script>
+    <script src="~/js/userModal.js" asp-append-version="true"></script>
     <script type="text/javascript">
         //Add tooltips
         InitialiseTooltips();

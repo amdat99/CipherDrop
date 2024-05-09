@@ -1,6 +1,6 @@
 //Shared elements
 const VaultFileViewer = $("#file-viewer");
-const VaultFileListContainer = $("#file-list-container");
+const VaultFileListContainer = $("#vault-file-list-container");
 const VaultFolderList = $(".vault-folder-list");
 const VaultFolderActions = $("#vault-folder-actions");
 const VaultAddItemBtn = $("#add-default-item");
@@ -12,7 +12,9 @@ let VaultCurrentTab = $("#tab-link-0");
 
 //Shared vars
 let ItemContent = [{ id: 0, Items: [], CurrentItem: null, ListEl: $("#vault-file-list-0"), CurrentFolderId: 0, CurrentSubFolderId: 0, LastId: 0 }];
+const TabIndexMap = { 0: 0 };
 let CurrentTabIndex = 0;
+let CurrentLinkId = 0;
 let CurrentFolder = null;
 
 //Shared functions
@@ -87,6 +89,32 @@ const AddItem = async (folderId) => {
     DisplayToast({ message: "Item added successfully", type: "success" });
   } else {
     DisplayToast({ message: "An error occured", type: "danger" });
+  }
+};
+
+/**
+ *  Set item to the file viewer
+ * @param {*} item
+ * @returns
+ */
+const SetItem = (item) => {
+  if (!item) return;
+  const token = sessionStorage.getItem("Token");
+  item.data.value = CryptoJS.AES.decrypt(item.data.value, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+  item.data.reference = CryptoJS.AES.decrypt(item.data.reference, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+
+  ItemContent[CurrentTabIndex].CurrentItem = item.data;
+  AdminSettings = item.aSettings;
+  //set values
+  fileViewerReference.val(item.data.reference);
+  fileViewerReference.text(item.data.reference);
+  tinymce.get("file-viewer-content").setContent(item.data.value);
+
+  ItemContent[CurrentTabIndex].ListEl.hide();
+  VaultFileViewer.show();
+  if (VaultItemPemrmissions.is(":visible")) {
+    VaultItemPemrmissions.hide();
+    tinymce.activeEditor.show();
   }
 };
 

@@ -45,7 +45,7 @@ public class VaultController(CipherDropContext context) : Controller
         }
     }
 
-    public IActionResult VaultItem(int id)
+    public async Task<IActionResult> VaultItem(int id)
     {
         try 
         {
@@ -54,7 +54,10 @@ public class VaultController(CipherDropContext context) : Controller
             // Decrypt the Value and Reference
             vaultItem.Value = EncryptionUtils.Decrypt(vaultItem.Value);
             vaultItem.Reference = EncryptionUtils.Decrypt(vaultItem.Reference);
-            return Json(new { success = true, data = vaultItem, aSettings = HttpContext.Items["AdminSettings"] as AdminSettings });
+            //Get the user permission for the item if it exists
+            var userPermission = await VaultItemPermissionsService.GetUserPermissionAsync(context, id, HttpContext.Items["Session"] as Session);
+
+            return Json(new { success = true, data = vaultItem, aSettings = HttpContext.Items["AdminSettings"] as AdminSettings , userPermission });
         }
         catch (Exception e)
         {
@@ -140,25 +143,6 @@ public class VaultController(CipherDropContext context) : Controller
             return StatusCode(500, new { success = false, message = "Error updating item" });
         }
     }
-
-    public async Task<IActionResult> UserPermissions(int id)
-    {
-        try 
-        {
-            var permissions = await VaultItemPermissionsService.GetPaginatedItemUserPermissions(context, id, Request.Query["lastId"].FirstOrDefault() ?? "0", (HttpContext.Items["Session"] as Session).UserId);
-            if(permissions == null)
-            {
-                return StatusCode(403, new { success = false, message = "Unauthorized" });
-            }
-            return Json(new { success = true });
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return StatusCode(500, new { success = false, message = "Error getting permissions" });
-        }
-    }
-    
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

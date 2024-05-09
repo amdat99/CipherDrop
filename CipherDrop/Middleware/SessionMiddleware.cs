@@ -11,14 +11,9 @@ namespace CipherDrop.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            // Check if the request path matches the desired paths where session middleware should run
-            if (context.Request.Path.StartsWithSegments("/Dashboard") ||
-                context.Request.Path.StartsWithSegments("/Vault") ||
-                context.Request.Path.StartsWithSegments("/Settings") ||
-                context.Request.Path.StartsWithSegments("/Loggedapi")||
-                context.Request.Path.StartsWithSegments("/Cipher")) 
+            // Check if the request doesnt start with the following paths
+            if (!context.Request.Path.StartsWithSegments("/Login") && !context.Request.Path.StartsWithSegments("/Register") && !context.Request.Path.StartsWithSegments("/Home"))
             {
-
                 using var scope = context.RequestServices.CreateScope();
                 
                 //check if the session cookie is present and valid

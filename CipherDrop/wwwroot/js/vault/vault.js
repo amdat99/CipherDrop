@@ -31,22 +31,6 @@ VaultFolderList.on("scroll", function () {
   }, 100);
 });
 
-const setFilePath = (folderId, text) => {
-  VaultFilePath.html(`<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a>`);
-  VaultCurrentTab.html(text);
-
-  $(".file-path-item").off("click");
-  $(".file-path-item").on("click", function (e) {
-    e.preventDefault();
-    const folderId = this.id.split("-")[2];
-    showListViwer();
-
-    //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
-    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return;
-    setItems(folderId, true);
-  });
-};
-
 const OnRootFolderClick = () => {
   $(".vault-root-folder").on("click", function (e) {
     const folderId = this.id.split("-")[2];
@@ -73,6 +57,24 @@ const OnRootFolderClick = () => {
 //Run the function on load
 OnRootFolderClick();
 
+const setFilePath = (folderId, text) => {
+  VaultFilePath.html(
+    `<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="mt-5">›</span>`
+  );
+  VaultCurrentTab.html(text);
+
+  $(".file-path-item").off("click");
+  $(".file-path-item").on("click", function (e) {
+    e.preventDefault();
+    const folderId = this.id.split("-")[2];
+    showListViwer();
+
+    //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
+    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return;
+    setItems(folderId, true);
+  });
+};
+
 const setItems = async (folderId, removeItemEListener = false) => {
   const items = await FetchFolderItems(folderId);
   if (!items) return false;
@@ -86,10 +88,11 @@ const setItems = async (folderId, removeItemEListener = false) => {
   const token = sessionStorage.getItem("Token");
 
   items.forEach((item) => {
-    currentitems += `<div id="item-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${item.isFolder ? "📁" : "📄"} ${CryptoJS.AES.decrypt(
-      item.reference,
-      token + adminsettings.keyEnd
-    ).toString(CryptoJS.enc.Utf8)}</span><span>${new Date(item.updatedAt).toLocaleDateString()}</span></div>`;
+    currentitems += `<div id="vaultitem-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${
+      item.isFolder ? "📁" : "📄"
+    } ${CryptoJS.AES.decrypt(item.reference, token + adminsettings.keyEnd).toString(CryptoJS.enc.Utf8)}</span><span>${new Date(
+      item.updatedAt
+    ).toLocaleDateString()}</span></div>`;
   });
 
   ItemContent[CurrentTabIndex].ListEl.append(currentitems);
@@ -124,6 +127,10 @@ const setItems = async (folderId, removeItemEListener = false) => {
 
 const showListViwer = () => {
   VaultFileViewer.hide();
-  VaultItemPemrmissions.hide();
+  tinymce.activeEditor.show();
   ItemContent[CurrentTabIndex].ListEl.show();
+  if (VaultItemPemrmissions.is(":visible")) {
+    VaultItemPemrmissions.hide();
+    tinymce.activeEditor.show();
+  }
 };

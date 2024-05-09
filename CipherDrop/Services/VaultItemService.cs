@@ -27,7 +27,6 @@ namespace CipherDrop.Services;
                         })
                         .OrderByDescending(vf => vf.UpdatedAt)
                         .Take(50)];
-                
         }
 
         public static VaultItem? GetVaultItem(CipherDropContext context, int id, int userId)
@@ -79,16 +78,49 @@ namespace CipherDrop.Services;
     public static async Task UpdateItemAsync(CipherDropContext context, VaultItem jsonData, Session? session)
     {
         jsonData.Value = EncryptionUtils.Encrypt(jsonData.Value);
-        jsonData.Reference = EncryptionUtils.Encrypt(jsonData.Reference);
-        context.VaultItem.Update(jsonData);   
+        await context.Database.ExecuteSqlInterpolatedAsync($@"
+        UPDATE VaultItem
+        SET Value = {jsonData.Value}, UpdatedAt = DATETIME('now')
+        WHERE Id = {jsonData.Id}
+            AND (
+                IsEditRestricted = 0
+                OR (
+                    IsEditRestricted = 1
+                    AND EXISTS (
+                        SELECT UserId
+                        FROM SharedVaultItem
+                        WHERE VaultItemId = {jsonData.Id}
+                            AND ROLE != 'View'
+                            AND UserId = {session.UserId}
+                        )
+                    )
+                )");
         await ActivityService.AddActivityAsync("Vault", jsonData.Id, "Update item", jsonData.IsFolder ? "Folder" : "Item", session , context);
     }
 
     public static async Task UpdateItemReferenceAsync(CipherDropContext context, VaultItem jsonData, Session? session)
     {
-        context.VaultItem.FromSql($"UPDATE VaultItem SET Reference = '{EncryptionUtils.Encrypt(jsonData.Reference)}' WHERE Id = {jsonData.Id}");
+        string encryptedReference = EncryptionUtils.Encrypt(jsonData.Reference);
+        await context.Database.ExecuteSqlInterpolatedAsync($@"
+        UPDATE VaultItem 
+        SET Reference = {encryptedReference}, UpdatedAt = DATETIME('now')
+        WHERE Id = {jsonData.Id}
+            AND (
+                IsEditRestricted = 0
+                OR (
+                    IsEditRestricted = 1
+                    AND EXISTS (
+                        SELECT UserId
+                        FROM SharedVaultItem
+                        WHERE VaultItemId = {jsonData.Id}
+                            AND ROLE != 'View'
+                            AND UserId = {session.UserId}
+                        )
+                    )
+                )");
         await ActivityService.AddActivityAsync("Vault", jsonData.Id, "Update item", jsonData.IsFolder ? "Folder" : "Item", session, context);
     }   
+    
     public static async Task DeleteItem(CipherDropContext context, int id, Session? session)
     {
         var item = context.VaultItem.Where(vi => vi.Id == id).FirstOrDefault();

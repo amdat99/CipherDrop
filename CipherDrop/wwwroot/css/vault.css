@@ -1,8 +1,10 @@
 #file-viewer-content {
-  height: 55vh;
   margin-top: 0px !important;
   color: #fff;
+  visibility: hidden;
+  background-color: transparent;
   border-color: transparent;
+  display: none;
 }
 
 #file-viewer-reference {
@@ -86,8 +88,8 @@
 
 .vault-tabs {
   padding: 0 !important;
-  max-height: 17px;
-  font-size: 12px !important;
+  max-height: 20px;
+  font-size: 13px !important;
 }
 
 .item-actions {
@@ -105,7 +107,7 @@
 
 .vault-tabs .nav-link {
   margin-right: 0px !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   cursor: pointer;
   text-align: center;
   min-width: 70px;
@@ -114,6 +116,11 @@
   padding: 5px 10px;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.vault-tabs .nav-link:hover {
+  background-color: var(--card-offset-color) !important;
+  transition: background-color 0.3s;
 }
 
 .vault-tabs .nav-link.active {

@@ -47,9 +47,19 @@ const RequestHandler = async ({ method, url, body }) => {
  * @param {function} submitFunction - The function to run when the form is submitted
  * @param {function} [closeModalFunction] - The function to run when the modal is closed
  * @param {boolean} [backdropClose] - Whether to close the modal when the backdrop is clicked
+ * @param {string} [buttonStyle] - The style of the button
  * @returns {void}
  */
-const DisplayModal = ({ content, minWidth = "300px", maxWidth = "800px", buttonText, submitFunction, closeModalFunction = null, backdropClose = true }) => {
+const DisplayModal = ({
+  content,
+  minWidth = "300px",
+  maxWidth = "800px",
+  buttonText,
+  submitFunction,
+  closeModalFunction = null,
+  backdropClose = true,
+  buttonStyle = "",
+}) => {
   dialog = document.createElement("dialog");
   modalbackdrop = document.createElement("div");
   modalbackdrop.classList.add("modal-backdrop");
@@ -59,7 +69,7 @@ const DisplayModal = ({ content, minWidth = "300px", maxWidth = "800px", buttonT
     <form class="card-body" id="modal-form">
         ${content}  
       <div class="d-grid mt-4">
-        <button type="submit" id="modalSubmit" class="btn btn-primary btn-block">${buttonText || "Submit"}</button>
+        <button type="submit" id="modalSubmit" class="btn btn-primary btn-block" style="${buttonStyle}">${buttonText || "Submit"}</button>
       </div>
     </form>
   </div>
@@ -97,6 +107,7 @@ const CloseModal = () => {
   document.body.removeChild(dialog);
   document.body.removeChild(modalbackdrop);
   modalbackdrop = null;
+  currentUser = null;
   dialog = null;
   if (closeModalFunctVar) {
     closeModalFunctVar();

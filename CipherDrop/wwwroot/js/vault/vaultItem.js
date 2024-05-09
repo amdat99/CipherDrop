@@ -4,6 +4,13 @@ let referenceTimeout = null;
 let loading = false;
 let lastString = "";
 
+fileViewerReference.on("input", function () {
+  if (referenceTimeout) clearTimeout(referenceTimeout);
+  referenceTimeout = setTimeout(() => {
+    updateItemReference(this.value);
+  }, 1000);
+});
+
 /**
  *  Handles the change event for the value field
  * @param {*} e - The event object
@@ -25,36 +32,9 @@ const OnItemClick = (removeEventListenerFirst = false) => {
     const item = await FetchItem(this.id.split("-")[1]);
     if (!item) return;
     //decrypt item value and set it
-    setItem(item);
+    SetItem(item);
     //Update current tab text
     VaultCurrentTab.html(item?.data?.reference || "Item");
-  });
-};
-
-const setItem = (item) => {
-  const token = sessionStorage.getItem("Token");
-  item.data.value = CryptoJS.AES.decrypt(item.data.value, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
-  item.data.reference = CryptoJS.AES.decrypt(item.data.reference, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
-
-  ItemContent[CurrentTabIndex].CurrentItem = item.data;
-  AdminSettings = item.aSettings;
-  //set values
-  fileViewerReference.val(item.data.reference);
-  fileViewerReference.text(item.data.reference);
-  tinymce.get("file-viewer-content").setContent(item.data.value);
-
-  ItemContent[CurrentTabIndex].ListEl.hide();
-  VaultFileViewer.show();
-  tinymce.activeEditor.focus();
-};
-
-onChangeReference = () => {
-  fileViewerReference.on("input", function () {
-    if (referenceTimeout) clearTimeout(referenceTimeout);
-    referenceTimeout = setTimeout(() => {
-      ItemContent[CurrentTabIndex].CurrentItem.reference = this.value;
-      updateItem(ItemContent[CurrentTabIndex].CurrentItem);
-    }, 1000);
   });
 };
 
@@ -74,6 +54,27 @@ const updateItem = async (value) => {
     ItemContent[CurrentTabIndex].CurrentItem = tempItem;
     ItemContent[CurrentTabIndex].CurrentItem.value = value;
     ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
+  } else {
+    if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
+    else DisplayToast({ message: "An error occured", type: "danger" });
+  }
+};
+
+const updateItemReference = async (reference) => {
+  if (loading) return;
+  const tempItem = { ...ItemContent[CurrentTabIndex].CurrentItem };
+  tempItem.reference = CryptoJS.AES.encrypt(reference, sessionStorage.getItem("Token") + AdminSettings.keyEnd).toString();
+  loading = true;
+  const request = await RequestHandler({ url: `/vault/UpdateItemReference/`, method: "PUT", body: { ...tempItem, value: "" } });
+  loading = false;
+  if (request.success) {
+    ItemContent[CurrentTabIndex].CurrentItem = tempItem;
+    ItemContent[CurrentTabIndex].CurrentItem.reference = reference;
+    ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
+    $("#vaultitem-" + ItemContent[CurrentTabIndex].CurrentItem.id)
+      .find("span")
+      .first()
+      .text(`📄 ${reference}`);
   } else {
     if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
     else DisplayToast({ message: "An error occured", type: "danger" });

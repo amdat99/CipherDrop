@@ -44,12 +44,27 @@ VaultAddSubFolderBtn.on("click", function () {
 });
 
 $("#tab-add-item").on("click", function () {
-  const id = Math.random();
+  const id = Math.random().toString().replace(".", "");
   const newFileList = $(`<div id="vault-file-list-${id}"></div>`);
   ItemContent.push({ Id: Math.random(), ListEl: newFileList, CurrentItem: null, CurrentFolderId: 0, LastId: 0, CurrentSubFolderId: 0 });
-  VaultFileList.append(newFileList);
+  //append new tab 1 before the add tab
+  $("#tab-add-item").before(`<span class="nav-link vault-tab active " id="tab-link-${id}">Items</span>`);
+  VaultFileListContainer.append(newFileList);
+
+  //Hide the current tab and remove active clas from current tab
+  $(`#tab-link-${CurrentLinkId}`).removeClass("active");
+  ItemContent[CurrentTabIndex].ListEl.hide();
+
+  //Reset active styles on root folder for current tab and reset file path
+  $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`).removeAttr("style");
+  VaultFilePath.html("");
 
   CurrentTabIndex = ItemContent.length - 1;
+  TabIndexMap[id] = CurrentTabIndex;
+  CurrentLinkId = id;
+
+  showListViwer();
+  setTabLinkOnClick();
 });
 
 const addRootFolder = async () => {
@@ -68,4 +83,42 @@ const addRootFolder = async () => {
   } else {
     DisplayToast({ message: request?.message || "An error occured", type: "danger" });
   }
+};
+
+const setTabLinkOnClick = () => {
+  $(".vault-tab").off("click");
+  $(".vault-tab").on("click", async function (e) {
+    const id = e.target.id.split("-")[2];
+    if (CurrentLinkId === id) return;
+    $(`#tab-link-${CurrentLinkId}`).removeClass("active");
+    ItemContent[CurrentTabIndex].ListEl.hide();
+    $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`).removeAttr("style");
+
+    CurrentTabIndex = TabIndexMap[id];
+    CurrentLinkId = id;
+    //set active styles and path
+    $(`#tab-link-${id}`).addClass("active");
+    $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`)
+      .css("background-color", "var(--secondary-color)")
+      .css("border", "1px solid var(--primary-color)");
+
+    //Check if a item is selected and show if so
+    if (ItemContent[CurrentTabIndex].CurrentItem) {
+      const { CurrentItem } = ItemContent[CurrentTabIndex];
+
+      CurrentItem.reference
+        ? (tinymce.get("file-viewer-content").setContent(CurrentItem.value), fileViewerReference.text(CurrentItem.reference))
+        : await FetchItem(CurrentItem.id).then((item) => SetItem(item?.data));
+
+      VaultFileViewer.show();
+
+      if (VaultItemPemrmissions.is(":visible")) {
+        VaultItemPemrmissions.hide();
+        tinymce.activeEditor.show();
+      }
+    } else {
+      ItemContent[CurrentTabIndex].ListEl.show();
+      VaultFileViewer.hide();
+    }
+  });
 };

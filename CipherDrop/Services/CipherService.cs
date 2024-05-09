@@ -78,7 +78,6 @@ public class CipherService
                 expiryTime = DateTime.MaxValue;
                 break;
         }
-
         return expiryTime;
     }
 }
