@@ -63,6 +63,7 @@ $("#tab-add-item").on("click", function () {
   TabIndexMap[id] = CurrentTabIndex;
   CurrentLinkId = id;
 
+  VaultCurrentTab = $(`#tab-link-${id}`);
   showListViwer();
   setTabLinkOnClick();
 });
@@ -96,12 +97,18 @@ const setTabLinkOnClick = () => {
 
     CurrentTabIndex = TabIndexMap[id];
     CurrentLinkId = id;
+    const curFolderId = ItemContent[CurrentTabIndex].CurrentFolderId;
+
     //set active styles and path
     $(`#tab-link-${id}`).addClass("active");
-    $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`)
-      .css("background-color", "var(--secondary-color)")
-      .css("border", "1px solid var(--primary-color)");
+    const currentFolder = $(`#root-folder-${curFolderId}`);
+    currentFolder.css("background-color", "var(--secondary-color)").css("border", "1px solid var(--primary-color)");
 
+    //Set file path
+    VaultFilePath.html(
+      `<a id="vault-folder-${curFolderId}" class="vault-root-folder file-path-item" "href="/vault/home/${curFolderId}">${currentFolder.text()}</a> <span class="mt-5">›</span>`
+    );
+    VaultCurrentTab = $(`#tab-link-${id}`);
     //Check if a item is selected and show if so
     if (ItemContent[CurrentTabIndex].CurrentItem) {
       const { CurrentItem } = ItemContent[CurrentTabIndex];
