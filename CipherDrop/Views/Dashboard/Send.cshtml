@@ -1,10 +1,6 @@
 @{
     ViewData["Title"] = "Send Cipher";
 }
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="~/js/auth.js" asp-append-version="true"></script>
-<script >var key = CheckAuth();</script>
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -118,7 +114,10 @@
 </div>
 
 @section Scripts {
-        <script src="~/js/send.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script >CheckAuth();</script>
+    <script src="~/js/send.js" asp-append-version="true"></script>
 }
 
 

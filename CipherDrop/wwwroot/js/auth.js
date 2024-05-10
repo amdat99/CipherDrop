@@ -1,4 +1,5 @@
 let AdminSettings = null;
+let Token = null;
 
 /**
  * Handles local key verification and setting user values to local storage if data parameter is passed in
@@ -17,13 +18,13 @@ function CheckAuth(data) {
   }
 
   // Check if session storage is present
-  token = sessionStorage.getItem("Token");
+  Token = sessionStorage.getItem("Token");
 
-  if (!token) {
+  if (!Token) {
     onSetToken();
   }
 
-  return token;
+  return Token;
 }
 //Display modal to set and verify token
 const onSetToken = () => {
@@ -51,6 +52,7 @@ const verifyToken = async () => {
   //Check if the token is valid
   if (token && adminsettings && CryptoJS.AES.decrypt(adminsettings.encyptionTestText, token + adminsettings.keyEnd).toString(CryptoJS.enc.Utf8) === "test") {
     sessionStorage.setItem("Token", token);
+    Token = token;
     CloseModal();
     return token;
   } else {
@@ -65,7 +67,6 @@ const verifyToken = async () => {
  * @example
  * const adminSettings = await FetchAdminSettings();
  */
-
 const FetchAdminSettings = async () => {
   if (AdminSettings) return AdminSettings;
 
@@ -77,6 +78,7 @@ const FetchAdminSettings = async () => {
     }
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 

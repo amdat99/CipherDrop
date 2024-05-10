@@ -13,9 +13,9 @@ tinymce.init({
   powerpaste_html_import: "clean",
   powerpaste_allow_local_images: true,
   plugins:
-    "advlist autolink lists link image charmap preview anchor searchreplace visualblocks codesample importcss accordion autolink anchor fullscreen insertdatetime media table help wordcount mention emoticons",
+    "advlist autolink lists link image charmap preview anchor searchreplace visualblocks codesample importcss accordion autolink anchor fullscreen insertdatetime media table help wordcount mention",
   toolbar:
-    "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | media pageembed emoticons | removeformat fullscreen",
+    "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | media pageembed | removeformat fullscreen",
   mentions: {
     source: function (query, process, delimiter) {
       console.log(query);

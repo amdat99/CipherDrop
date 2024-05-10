@@ -2,12 +2,6 @@
 @{
     ViewData["Title"] = "Dashboard";
 }
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="~/js/auth.js" asp-append-version="true"></script>
-<script>
-    CheckAuth({ email: "@TempData["Email"]", role: "@TempData["Role"]", name: "@TempData["Name"]" });
-</script>
-
 <div class="container mt-5">
     <section class="row">
         <div class="col-md-12">
@@ -82,6 +76,11 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js" integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script>
+        CheckAuth({ email: "@TempData["Email"]", role: "@TempData["Role"]", name: "@TempData["Name"]" });
+    </script>
     <script>
     const name = localStorage.getItem("name");
     const role = localStorage.getItem("role");

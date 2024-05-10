@@ -16,6 +16,7 @@ const TabIndexMap = { 0: 0 };
 let CurrentTabIndex = 0;
 let CurrentLinkId = 0;
 let CurrentFolder = null;
+let VaultLoading = false;
 
 //Shared functions
 /**
@@ -26,8 +27,11 @@ let CurrentFolder = null;
  */
 const FetchFolderItems = async (folderId, reset = true) => {
   try {
+    if (VaultLoading) return;
     if (reset) ItemContent[CurrentTabIndex].LastId = 0;
+    ToggleLoading();
     const request = await RequestHandler({ url: `/vault/vaultitems/${folderId}?lastId=${ItemContent[CurrentTabIndex].LastId}`, method: "GET" });
+    ToggleLoading();
     if (request.success) {
       AdminSettings = request.aSettings;
       return request?.data || [];
@@ -46,7 +50,10 @@ const FetchFolderItems = async (folderId, reset = true) => {
  */
 const FetchItem = async (id) => {
   try {
+    if (VaultLoading) return;
+    ToggleLoading();
     const request = await RequestHandler({ url: `/vault/vaultitem/${id}`, method: "GET" });
+    ToggleLoading();
     if (request.success) {
       return { data: request.data, aSettings: request.aSettings };
     }
@@ -140,4 +147,9 @@ const AddSubfolder = async (folderId) => {
   } else {
     DisplayToast({ message: "An error occured", type: "danger" });
   }
+};
+
+const ToggleLoading = () => {
+  VaultLoading = !VaultLoading;
+  VaultLoading ? VaultSpinner.css("display", "block") : VaultSpinner.css("display", "none");
 };

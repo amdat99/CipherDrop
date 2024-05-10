@@ -85,7 +85,7 @@ const setItems = async (folderId, removeItemEListener = false) => {
   const adminsettings = AdminSettings || (await FetchAdminSettings());
   if (!adminsettings) return false;
 
-  const token = sessionStorage.getItem("Token");
+  const token = Token || sessionStorage.getItem("Token");
 
   items.forEach((item) => {
     currentitems += `<div id="vaultitem-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${

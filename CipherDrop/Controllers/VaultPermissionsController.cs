@@ -39,7 +39,9 @@ public class VaultPermissionsController(CipherDropContext context) : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return StatusCode(500, new { success = false, message = e.Message == "User exixts" ? "User already has permissions" : "Error adding permissions" });
+            return e.Message == "User exixts" ?
+             StatusCode(400, new { success = false, message = "User already has permissions" }) : 
+             StatusCode(500, new { success = false, message = "Error adding permissions" });
         }
     }
 
@@ -71,7 +73,9 @@ public class VaultPermissionsController(CipherDropContext context) : Controller
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return StatusCode(500, new { success = false, message = e.Message == "Last Manage" ? "Cannot remove last Manage role" : "Error updating permissions" });
+            return e.Message == "Last Manage" ?
+                StatusCode(400, new { success = false, message = "Cannot remove last Manage role" }) :
+                StatusCode(500, new { success = false, message = "Error updating permissions" });
         }
     }
 
