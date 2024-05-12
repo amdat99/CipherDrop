@@ -1,12 +1,14 @@
+const rootFolderSearchEl = $("#root-folder-search");
 let isFolder = true;
-let scrolllTimeout = null;
+let rootFolderScrolllTimeout = null;
+let rootFolderSearchTimeout = null;
 let noMoreFolders = false;
 let folderLoading = false;
 
 VaultFolderList.on("scroll", function () {
   //Check if folders are more than 40 and if the user has scrolled to the bottom
-  scrolllTimeout && clearTimeout(scrolllTimeout);
-  scrolllTimeout = setTimeout(async () => {
+  rootFolderScrolllTimeout && clearTimeout(rootFolderScrolllTimeout);
+  rootFolderScrolllTimeout = setTimeout(async () => {
     if (!noMoreFolders && !folderLoading && this.scrollTop + this.clientHeight >= this.scrollHeight - 30 && VaultFolderList.children().length > 40) {
       //get the last folder id
       const lastFolder = $(".vault-root-folder").last()[0];
@@ -21,7 +23,7 @@ VaultFolderList.on("scroll", function () {
 
       let foldersHtml = "";
       folders.data.forEach((folder) => {
-        foldersHtml += `<div id="root-folder-${folder.id}" class="vault-root-folder card-offset-hover card-offset">📁 ${folder.reference}</div>`;
+        foldersHtml += formatFolders(folder);
       });
       VaultFolderList.append(foldersHtml);
 
@@ -31,25 +33,47 @@ VaultFolderList.on("scroll", function () {
   }, 100);
 });
 
+rootFolderSearchEl.on("input", (e) => {
+  const searchTerm = e.target.value;
+  clearTimeout(rootFolderSearchTimeout);
+  rootFolderSearchTimeout = setTimeout(async () => {
+    const folders = await RequestHandler({ url: `/vault/foldersSearch?query=${searchTerm}&isRoot=true`, method: "GET" });
+    if (!folders?.data) return;
+    let foldersHtml = "";
+    folders.data.forEach((folder) => {
+      foldersHtml += formatFolders(folder);
+    });
+    VaultFolderList.html(foldersHtml);
+    $(".vault-root-folder").off("click");
+    OnRootFolderClick();
+  }, 350);
+});
+
+const formatFolders = (folder) => {
+  return `<div id="root-folder-${folder.id}" class="vault-root-folder card-offset card-offset-hover ">
+      📁${folder.reference}
+    </div>`;
+};
+
 const OnRootFolderClick = () => {
   $(".vault-root-folder").on("click", function (e) {
     const folderId = this.id.split("-")[2];
     showListViwer();
     //Check if the folder is already selected if not set items for the folder
-    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return VaultCurrentTab.html(CurrentFolder.innerText);
+    if (!ItemContent[CurrentTabIndex].CurrentSubFolderId && ItemContent[CurrentTabIndex].CurrentFolderId === folderId) {
+      ItemContent[CurrentTabIndex].TabName = this.innerText;
+      return VaultCurrentTab.html(CurrentFolder.innerText);
+    }
     ItemContent[CurrentTabIndex].CurrentFolderId = folderId;
-
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
     //Change style of selected folder
     CurrentFolder && (CurrentFolder.style = "");
     this.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
     CurrentFolder = e.target;
-
     //Set folder path and and add listener to folder name in path
     setFilePath(folderId, this.innerText);
-
     //fetch folder items and render them if any
-    setItems(folderId);
-
+    SetItems(folderId);
     //Add id to url
     window.history.pushState(null, null, `/vault/home/${folderId}`);
   });
@@ -57,12 +81,21 @@ const OnRootFolderClick = () => {
 //Run the function on load
 OnRootFolderClick();
 
-const setFilePath = (folderId, text) => {
-  VaultFilePath.html(
-    `<a id="vault-folder-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="mt-5">›</span>`
-  );
-  VaultCurrentTab.html(text);
-
+/**
+ *
+ * @param {number} folderId
+ * @param {string} text
+ * @param {object} options
+ * [options] - [append] : boolean
+ * [options] - [removeAfter] : boolean
+ * [options] - [isSubFolder] : boolean
+ * [options] - [customHtml] : string
+ * [options] - [reset] : boolean
+ *
+ * @returns
+ */
+const setFilePath = (folderId, text, options) => {
+  formatFilePath(folderId, text, options);
   $(".file-path-item").off("click");
   $(".file-path-item").on("click", function (e) {
     e.preventDefault();
@@ -70,38 +103,54 @@ const setFilePath = (folderId, text) => {
     showListViwer();
 
     //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
-    if (ItemContent[CurrentTabIndex].CurrentFolderId === folderId) return;
-    setItems(folderId, true);
+    if (ItemContent[CurrentTabIndex].CurrentSubFolderId && ItemContent[CurrentTabIndex].CurrentSubFolderId == folderId) return;
+    else if (!ItemContent[CurrentTabIndex].CurrentSubFolderId && ItemContent[CurrentTabIndex].CurrentFolderId == folderId) return;
+
+    onSetItemAterClick(this.id, folderId, e);
   });
 };
 
-const setItems = async (folderId, removeItemEListener = false) => {
-  const items = await FetchFolderItems(folderId);
-  if (!items) return false;
+const formatFilePath = (folderId, text, options) => {
+  let html =
+    options?.customHtml ||
+    `<a id="vault-${
+      options?.isSubFolder ? "subfolder" : "folder"
+    }-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="mt-5">›</span>`;
 
-  if (ItemContent[CurrentTabIndex].LastId === 0) ItemContent[CurrentTabIndex].ListEl.empty();
+  switch (true) {
+    case !!options?.append:
+      VaultFilePath.append(html);
+      ItemContent[CurrentTabIndex].PathArray.push({ folderId, text });
+      break;
+    case !!options?.removeAfter:
+      $(`#vault-subfolder-${folderId}`).nextAll().remove();
+      const index = ItemContent[CurrentTabIndex].PathArray.findIndex((x) => x.folderId === folderId);
+      ItemContent[CurrentTabIndex].PathArray = ItemContent[CurrentTabIndex].PathArray.slice(0, index + 1);
+      break;
+    case !!options?.reset:
+      VaultFilePath.html(html);
+      break;
+    default:
+      VaultFilePath.html(html);
+      ItemContent[CurrentTabIndex].PathArray = [{ folderId, text }];
+      break;
+  }
 
-  let currentitems = "";
-  const adminsettings = AdminSettings || (await FetchAdminSettings());
-  if (!adminsettings) return false;
+  if (text) {
+    VaultCurrentTab.html(text);
+    ItemContent[CurrentTabIndex].TabName = text;
+  }
+};
 
-  const token = Token || sessionStorage.getItem("Token");
-
-  items.forEach((item) => {
-    currentitems += `<div id="vaultitem-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${
-      item.isFolder ? "📁" : "📄"
-    } ${CryptoJS.AES.decrypt(item.reference, token + adminsettings.keyEnd).toString(CryptoJS.enc.Utf8)}</span><span>${new Date(
-      item.updatedAt
-    ).toLocaleDateString()}</span></div>`;
-  });
-
-  ItemContent[CurrentTabIndex].ListEl.append(currentitems);
-
-  ItemContent[CurrentTabIndex].CurrentItem = null;
-  ItemContent[CurrentTabIndex].Items = items;
-
-  OnItemClick(removeItemEListener);
-  return true;
+const onSetItemAterClick = (id, folderId, e) => {
+  if (id.startsWith("vault-folder")) {
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
+    setFilePath(folderId, e.target.innerText);
+  } else {
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = folderId;
+    setFilePath(folderId, e.target.innerText, { removeAfter: true, isSubFolder: true });
+  }
+  SetItems(folderId, true);
 };
 
 //Check query params and set folder items if query param is present
@@ -113,9 +162,8 @@ const setItems = async (folderId, removeItemEListener = false) => {
   const folderId = lastParam;
   ItemContent[CurrentTabIndex].CurrentFolderId = folderId;
 
-  if ((await setItems(folderId)) === false) return;
-
-  //Ckeck current folder and set path
+  if ((await SetItems(folderId)) === false) return;
+  //Check current folder and set path
   const folder = document.getElementById(`root-folder-${folderId}`);
   if (folder) {
     CurrentFolder && (CurrentFolder.style = "");
@@ -129,6 +177,7 @@ const showListViwer = () => {
   VaultFileViewer.hide();
   tinymce.activeEditor.show();
   ItemContent[CurrentTabIndex].ListEl.show();
+
   if (VaultItemPemrmissions.is(":visible")) {
     VaultItemPemrmissions.hide();
     tinymce.activeEditor.show();

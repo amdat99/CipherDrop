@@ -99,14 +99,10 @@ namespace CipherDrop.Services;
                 await CheckIfLastManagedRole(context, vaultItemId, userId);
             }
             
-            var SharedVaultItem = new SharedVaultItem
-                {
-                    VaultItemId = vaultItemId,
-                    UserId = userId,
-                    Role = role
-                };
-
-            context.SharedVaultItem.Update(SharedVaultItem);
+            context.Database.ExecuteSqlInterpolated($@"
+            UPDATE SharedVaultItem
+            SET Role = {role}
+            WHERE VaultItemId = {vaultItemId} AND UserId = {userId}");
             await context.SaveChangesAsync();
         }
 

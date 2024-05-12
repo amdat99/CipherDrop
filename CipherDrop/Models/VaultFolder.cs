@@ -22,6 +22,7 @@ public class VaultFolder
     public bool IsViewRestricted { get; set; } = false;
     public bool IsEditRestricted { get; set; } = false;
     public bool IsDeleteRestricted { get; set; } = true;
+    public bool RefE2  { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
     public DateTime? DeletedAt { get; set; }

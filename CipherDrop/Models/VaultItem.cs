@@ -15,14 +15,13 @@ public class VaultItem
     public User? User { get; set; } = default!;
     public int? FolderId { get; set; }
     public VaultFolder? Folder { get; set; } 
-    public int? RootFolderId { get; set; }
+    public int? SubFolderId { get; set; }
 
     [MaxLength(300 , ErrorMessage = "Item title is too long")]
-    [Required]
     public string Reference { get; set; } = "";
 
     [Required]
-    [MaxLength(200000)]
+    [MaxLength(500000)]
     public string Value { get; set; } = "";
     public bool IsFolder { get; set; } = false; 
 
@@ -30,6 +29,7 @@ public class VaultItem
     public bool IsViewRestricted { get; set; } = false;
     public bool IsEditRestricted { get; set; } = false;
     public bool IsDeleteRestricted { get; set; } = true;
+    public bool RefE2  { get; set; } = false;
 
     [MaxLength(8)]
     public string? Type { get; set; } 

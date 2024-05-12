@@ -134,6 +134,7 @@
   position: relative;
   font-size: 15px;
   top: 7px;
+  cursor: pointer;
 }
 
 .file-path-item:hover {

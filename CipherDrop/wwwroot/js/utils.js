@@ -149,3 +149,12 @@ const InitialiseTooltips = () => {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 };
+
+const ToggleSiteLoader = (show = true) => {
+  const loader = document.getElementById("site-loader");
+  if (show) {
+    loader.style.display = "block";
+  } else {
+    loader.style.display = "none";
+  }
+};

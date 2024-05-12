@@ -15,7 +15,7 @@ tinymce.init({
   plugins:
     "advlist autolink lists link image charmap preview anchor searchreplace visualblocks codesample importcss accordion autolink anchor fullscreen insertdatetime media table help wordcount mention",
   toolbar:
-    "undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | media pageembed | removeformat fullscreen",
+    "undo redo | formatselect | bold italic forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | media pageembed | removeformat fullscreen",
   mentions: {
     source: function (query, process, delimiter) {
       console.log(query);
@@ -27,7 +27,7 @@ tinymce.init({
     },
     queryBy: "name",
     delimiter: ["@", "#"],
-    mentioned_style: "background-color: #212529; color: white; border: 1px solid #141414; padding: 2px; border-radius: 6px;",
+    mentioned_style: "background-color: #2c2c2c; color: white; border: 1px solid #141414; padding: 2px; border-radius: 6px; cursor: pointer;",
     // loading_text: '',
     // loading_class: 'mentions-loader',
     insert: function (item) {

@@ -23,6 +23,8 @@ public class AdminSettings
     [MaxLength(5)]
     public string RequirePasswordChangeDays { get; set; }  = "180";
     public bool RequirePasswordChangeOnFirstLogin { get; set; } = false;
+
+    public bool AllowGlobalSearchAndLinking { get; set ; } = true;
     public bool AllowPublicSharing { get; set; } = true;
     public bool DisplayActivity { get; set; } = true;
     

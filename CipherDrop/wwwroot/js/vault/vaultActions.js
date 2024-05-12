@@ -23,7 +23,7 @@ VaultAddItemBtn.on("click", function () {
       </div>
       `,
     buttonText: "Add Item",
-    submitFunction: () => AddItem(ItemContent[CurrentTabIndex].CurrentFolderId),
+    submitFunction: () => AddItem(ItemContent[CurrentTabIndex].CurrentSubFolderId || ItemContent[CurrentTabIndex].CurrentFolderId),
   });
 });
 
@@ -34,12 +34,12 @@ VaultAddSubFolderBtn.on("click", function () {
   DisplayModal({
     content: `
       <div class="mb-3">
-        <label for="folderName" class="form-label">Folder Name</label>
-        <input type="text" class="form-control" id="subfolderName" name="folderName" required>
+        <label for="folderName" class="form-label">Subfolder Name</label>
+        <input type="text" class="form-control" id="fileReference" name="folderName" required>
       </div>
       `,
     buttonText: "Add Sub Folder",
-    submitFunction: () => AddSubfolder(ItemContent[CurrentTabIndex].CurrentFolderId),
+    submitFunction: () => AddItem(ItemContent[CurrentTabIndex].CurrentSubFolderId || ItemContent[CurrentTabIndex].CurrentFolderId, true),
   });
 });
 
@@ -91,6 +91,7 @@ const setTabLinkOnClick = () => {
   $(".vault-tab").on("click", async function (e) {
     const id = e.target.id.split("-")[2];
     if (CurrentLinkId === id) return;
+    //Hide the current tab and remove active clas from current tab
     $(`#tab-link-${CurrentLinkId}`).removeClass("active");
     ItemContent[CurrentTabIndex].ListEl.hide();
     $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`).removeAttr("style");
@@ -104,19 +105,31 @@ const setTabLinkOnClick = () => {
     const currentFolder = $(`#root-folder-${curFolderId}`);
     currentFolder.css("background-color", "var(--secondary-color)").css("border", "1px solid var(--primary-color)");
 
-    //Set file path
-    VaultFilePath.html(
-      `<a id="vault-folder-${curFolderId}" class="vault-root-folder file-path-item" "href="/vault/home/${curFolderId}">${currentFolder.text()}</a> <span class="mt-5">›</span>`
-    );
-    VaultCurrentTab = $(`#tab-link-${id}`);
+    VaultFilePath.html("");
+    let pathContent = "";
+    ItemContent[CurrentTabIndex].PathArray.forEach((path, index) => {
+      pathContent += `<a id="vault-${index == 0 ? "folder" : "subfolder"}-${path.folderId}" class="vault-root-folder file-path-item" href="/vault/home/${
+        path.folderId
+      }">${path.text}</a> <span class="mt-5">›</span>`;
+    });
+
+    setFilePath(ItemContent[CurrentTabIndex].CurrentSubFolderId || ItemContent[CurrentTabIndex].CurrentSubFolderId, "", {
+      customHtml: pathContent,
+      reset: true,
+    });
+
+    VaultCurrentTab = $(`#tab-link-${CurrentLinkId}`);
     //Check if a item is selected and show if so
     if (ItemContent[CurrentTabIndex].CurrentItem) {
       const { CurrentItem } = ItemContent[CurrentTabIndex];
-
+      //Set the prefetched item or fetch it again and reformat it
       CurrentItem.reference
-        ? (tinymce.get("file-viewer-content").setContent(CurrentItem.value), fileViewerReference.text(CurrentItem.reference))
+        ? (tinymce.get("file-viewer-content").setContent(CurrentItem.value),
+          fileViewerReference.text(CurrentItem.reference),
+          fileViewerReference.val(CurrentItem.reference))
         : await FetchItem(CurrentItem.id).then((item) => SetItem(item?.data));
 
+      ToggleItemPermissions(ItemContent[CurrentTabIndex]?.UserPermission, CurrentItem);
       VaultFileViewer.show();
 
       if (VaultItemPemrmissions.is(":visible")) {
@@ -126,6 +139,7 @@ const setTabLinkOnClick = () => {
     } else {
       ItemContent[CurrentTabIndex].ListEl.show();
       VaultFileViewer.hide();
+      VaultCurrentTab.html(ItemContent[CurrentTabIndex].TabName);
     }
   });
 };

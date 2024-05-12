@@ -51,7 +51,7 @@ const getUserSearchList = async (searchTerm) => {
   let userHtml = "";
   request.data.forEach((user) => {
     userHtml += `
-      <li class="list-group-item d-flex justify-content-between align-items-center user-list-item cursor-pointer card-offset card-offset-hover" id="user-${user.id}">
+      <li class="list-group-item d-flex justify-content-between align-items-center user-list-item cursor-pointer card-offset card-offset-hover mb-2" id="user-${user.id}">
         ${user.name} <span class="badge bg-primary rounded-pill">${user.email}</span>
       </li>
     `;

@@ -24,6 +24,7 @@ public class Cipher
     public bool SelfDestruct { get; set; }  = false;
     public byte[]? Password { get; set; } 
     public byte[]? PasswordSalt { get; set; }    
+    public bool RefE2  { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
     public DateTime? DeletedAt { get; set; }

@@ -10,7 +10,8 @@ pre[class*="language-"] {
   padding: 10px;
   border-radius: 5px;
   border-color: transparent;
-  overflow: visible;
+  overflow: auto;
+  max-height: 90vh;
 }
 
 code[class*="language-"],
@@ -20,6 +21,23 @@ pre[class*="language-"] {
 
 #tinymce a {
   color: #5dd461 !important;
+}
+
+.language-markup {
+  background-color: #2c2c2c !important;
+  position: relative;
+}
+
+.language-markup::after {
+  content: "Copy";
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 5px 10px;
+  background-color: #5dd46116;
+  color: #fff;
+  border-radius: 0 5px 0 5px;
+  cursor: pointer;
 }
 
 .mce-content-body [contentEditable="false"][data-mce-selected] {
@@ -78,7 +96,6 @@ pre[class*="language-"] {
 
 .tox-toolbar__primary {
   background: var(--card-color) !important;
-  border-bottom: 0.5px solid #212529d0 !important;
   box-shadow: none !important;
 }
 
@@ -88,7 +105,8 @@ pre[class*="language-"] {
 }
 
 .tox .tox-tbtn:hover svg {
-  fill: var(--secondary-color);
+  background-color: var(--secondary-color);
+  border-radius: 6px;
 }
 
 .tox .tox-tbtn svg {
@@ -98,7 +116,7 @@ pre[class*="language-"] {
 
 .tox .tox-statusbar {
   background: var(--card-color) !important;
-  border-top: 0.5px solid #212529d0 !important;
+  /* border-top: 0.5px solid #212529d0 !important; */
 }
 
 .tox-statusbar__path-item {
@@ -107,7 +125,7 @@ pre[class*="language-"] {
 
 .tox .tox-menu {
   background-color: var(--secondary-color) !important;
-  border: 1px solid var(--card-border-color) !important;
+  /* border: 1px solid var(--card-border-color) !important; */
   color: #fff !important;
 }
 
@@ -117,8 +135,7 @@ pre[class*="language-"] {
 }
 
 .tox .tox-collection__item:hover {
-  background: var(--secondary-color) !important;
-  color: #fff !important;
+  background: var(--card-color) !important;
   cursor: pointer !important;
 }
 
@@ -137,7 +154,6 @@ pre[class*="language-"] {
 
 .tox-dialog__footer {
   background-color: var(--card-color) !important;
-  border-top: 1px solid var(--card-border-color) !important;
   color: #fff !important;
 }
 
@@ -156,11 +172,42 @@ pre[class*="language-"] {
 
 .tox .tox-button {
   background-color: var(--card-color) !important;
-  border-color: var(--primary-color) !important;
+  border-color: var(--primary-color);
+  color: #fff !important;
+}
+
+.tox .tox-button--naked {
+  border-color: transparent !important;
+}
+
+.tox .tox-textarea {
+  background-color: var(--secondary-color) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+.tox .tox-listboxfield .tox-listbox--selected {
+  background-color: var(--secondary-color) !important;
+  color: #fff !important;
+}
+
+.tox .tox-textfield {
+  background-color: var(--secondary-color) !important;
+  border-color: transparent !important;
   color: #fff !important;
 }
 
 .tox-textfield:focus {
+  border-color: var(--primary-color) !important;
+  outline: none !important;
+}
+
+.tox .tox-listboxfield .tox-listbox--selected:focus {
+  background-color: var(--secondary-color) !important;
+  color: #fff !important;
+}
+
+.tox .tox-textarea:focus {
   border-color: var(--primary-color) !important;
   outline: none !important;
 }
@@ -186,6 +233,26 @@ pre[class*="language-"] {
 
 .tox-statusbar__resize-handle:hover svg {
   fill: #fff;
+}
+
+.ephox-snooker-resizer-bar {
+  background-color: #5dd461 !important;
+}
+
+.mce-content-body table[data-mce-selected] {
+  outline: 2px solid #5dd461 !important;
+}
+
+.tox .tox-pop__dialog {
+  background-color: #2c2c2c !important;
+  border: 1px solid #0d0d0d !important;
+  box-shadow: none !important;
+}
+
+.tox-tooltip__body {
+  background-color: black !important;
+  color: #fff !important;
+  font-weight: normal !important;
 }
 /* Chrome, Edge and Safari */
 *::-webkit-scrollbar {

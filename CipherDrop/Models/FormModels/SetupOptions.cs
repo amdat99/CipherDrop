@@ -12,6 +12,7 @@ public class SetupOptions
     public string? RequirePasswordChangeDays { get; set; }  = "180";
     public bool? RequirePasswordChangeOnFirstLogin { get; set; } = false;
     public bool? AllowPublicSharing { get; set; } = true;
+    public bool? AllowGlobalSearchAndLinking { get; set;  } = true;
     public bool? DisplayActivity { get; set; } = true;
     public string EncyptionTestText { get; set; } = "";
     public string KeyEnd { get; set; } = "";

@@ -7,11 +7,14 @@ const VaultAddItemBtn = $("#add-default-item");
 const VaultAddSubFolderBtn = $("#add-sub-folder");
 const VaultFilePath = $("#file-path");
 const VaultItemPemrmissions = $("#item-permissions");
+const PermissionsButtonEl = $("#permissions-btn");
 
 let VaultCurrentTab = $("#tab-link-0");
 
 //Shared vars
-let ItemContent = [{ id: 0, Items: [], CurrentItem: null, ListEl: $("#vault-file-list-0"), CurrentFolderId: 0, CurrentSubFolderId: 0, LastId: 0 }];
+let ItemContent = [
+  { id: 0, Items: [], CurrentItem: null, ListEl: $("#vault-file-list-0"), CurrentFolderId: 0, CurrentSubFolderId: null, LastId: 0, TabName: "Items" },
+];
 const TabIndexMap = { 0: 0 };
 let CurrentTabIndex = 0;
 let CurrentLinkId = 0;
@@ -21,8 +24,8 @@ let VaultLoading = false;
 //Shared functions
 /**
  *
- * @param {*} folderId
- * @param {*} reset
+ * @param {number} folderId
+ * @param {boolean} reset
  * @returns
  */
 const FetchFolderItems = async (folderId, reset = true) => {
@@ -45,7 +48,7 @@ const FetchFolderItems = async (folderId, reset = true) => {
 
 /**
  *
- * @param {*} id
+ * @param {int} id
  * @returns
  */
 const FetchItem = async (id) => {
@@ -55,7 +58,7 @@ const FetchItem = async (id) => {
     const request = await RequestHandler({ url: `/vault/vaultitem/${id}`, method: "GET" });
     ToggleLoading();
     if (request.success) {
-      return { data: request.data, aSettings: request.aSettings };
+      return request;
     }
     return null;
   } catch (error) {
@@ -66,37 +69,40 @@ const FetchItem = async (id) => {
 
 /**
  *
- * @param {*} folderId
+ * @param {number} folderId
+ * @param {boolean} isFolder
  * @returns
  */
-const AddItem = async (folderId) => {
+const AddItem = async (folderId, isFolder = false) => {
   const fileReference = $("#fileReference").val();
-  let value = " ";
-  if (!fileReference || !value) return;
-  //encrypt the reference
-  const token = sessionStorage.getItem("Token");
+  const token = Token || sessionStorage.getItem("Token");
   const adminsettings = AdminSettings || (await FetchAdminSettings());
-  if (!token || !adminsettings) return;
-  const encryptedReference = CryptoJS.AES.encrypt(fileReference, token + adminsettings.keyEnd).toString();
+  if (!fileReference || !token || !adminsettings) return;
 
-  const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: encryptedReference, value, isFolder: false } });
-  if (request.success) {
-    CloseModal();
-    //Add to top of the list
-    ItemContent[CurrentTabIndex].ListEl.prepend(
-      `<div id="item-${
-        request.id
-      }" class="vault-item card-offset card-offset-hover p-3"><span>📄 ${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
-    );
-    //Remove event listener for the items before setting again by passing true arg
-    OnItemClick(true);
+  //encrypt the reference
+  const curReference = AdminSettings.allowGlobalSearchAndLinking ? fileReference : CryptoJS.AES.encrypt(fileReference, token + adminsettings.keyEnd).toString();
+  const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: curReference, value: " ", isFolder } });
+  if (!request?.success) return DisplayToast({ message: "An error occured", type: "danger" });
+  //Add to top of the list
+  ItemContent[CurrentTabIndex].ListEl.prepend(
+    `<div id="item-${request.id}" class="vault-item card-offset card-offset-hover p-3"><span>${
+      isFolder ? "📁" : "📄"
+    } ${fileReference}</span><span >${new Date().toLocaleDateString()}</span></div>`
+  );
+  //Remove event listener for the items before setting again by passing true arg
+  OnItemClick(true);
+
+  if (isFolder) {
+    VaultFileViewer.hide();
+    ItemContent[CurrentTabIndex].ListEl.show();
+  } else {
     const item = await FetchItem(request.id);
     if (!item) return;
-    setItem(item);
-    DisplayToast({ message: "Item added successfully", type: "success" });
-  } else {
-    DisplayToast({ message: "An error occured", type: "danger" });
+    SetItem(item);
   }
+
+  DisplayToast({ message: isFolder ? "Folder added successfully" : "Item added successfully", type: "success" });
+  CloseModal();
 };
 
 /**
@@ -104,52 +110,78 @@ const AddItem = async (folderId) => {
  * @param {*} item
  * @returns
  */
-const SetItem = (item) => {
+const SetItem = async (item, isSubfolder = false) => {
   if (!item) return;
-  const token = sessionStorage.getItem("Token");
+  const token = Token || sessionStorage.getItem("Token");
+  AdminSettings = item.aSettings;
+
   item.data.value = CryptoJS.AES.decrypt(item.data.value, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
-  item.data.reference = CryptoJS.AES.decrypt(item.data.reference, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
+  if (item.data?.refE2) item.data.reference = CryptoJS.AES.decrypt(item.data.reference, token + item.aSettings.keyEnd).toString(CryptoJS.enc.Utf8);
 
   ItemContent[CurrentTabIndex].CurrentItem = item.data;
-  AdminSettings = item.aSettings;
-  //set values
-  fileViewerReference.val(item.data.reference);
-  fileViewerReference.text(item.data.reference);
-  tinymce.get("file-viewer-content").setContent(item.data.value);
+  ItemContent[CurrentTabIndex].UserPermission = item?.userPermission;
 
-  ItemContent[CurrentTabIndex].ListEl.hide();
-  VaultFileViewer.show();
-  if (VaultItemPemrmissions.is(":visible")) {
-    VaultItemPemrmissions.hide();
-    tinymce.activeEditor.show();
+  //set values and show file viewe if not sub folder
+  if (!isSubfolder) {
+    fileViewerReference.val(item.data.reference);
+    fileViewerReference.text(item.data.reference);
+    tinymce.get("file-viewer-content").setContent(item.data.value);
+
+    ItemContent[CurrentTabIndex].ListEl.hide();
+    VaultFileViewer.show();
+    if (VaultItemPemrmissions.is(":visible")) {
+      VaultItemPemrmissions.hide();
+      tinymce.activeEditor.show();
+    }
+  } else {
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = item.data.subFolderId;
+    if (await SetItems(item.data.subFolderId, true)) setFilePath(item.data.subFolderId, item.data.reference, { append: true, isSubFolder: true });
   }
+
+  //show or hide permissions button and set readonly mode based on user permission and default restrictions
+  ToggleItemPermissions(item?.userPermission, item.data);
 };
 
-/**
- * Add subfolder to the vault folder
- * @param {*} folderId
- * @returns
- */
-const AddSubfolder = async (folderId) => {
-  const folderName = $("#subfolderName").val();
-  if (!folderName) return DisplayToast({ message: "An error occured", type: "danger" });
-  const request = await RequestHandler({ url: "/vault/additem", method: "POST", body: { folderId, reference: folderName, value: " ", isFolder: true } });
-  if (request.success) {
-    CloseModal();
-    //Add to top of the list
-    ItemContent[CurrentTabIndex].ListEl.prepend(
-      `<div id="folder-${request.id}" class="vault-item p-3"><span>📁 ${folderName}</span><span >${new Date().toLocaleDateString()}</span></div>
-      `
-    );
-    //Remove event listener for the items before setting again by passing true arg
-    OnItemClick(true);
-    DisplayToast({ message: "Subfolder added successfully", type: "success" });
-  } else {
-    DisplayToast({ message: "An error occured", type: "danger" });
-  }
+const SetItems = async (folderId, removeItemEListener = false) => {
+  const items = await FetchFolderItems(folderId);
+  if (!items) return false;
+
+  ItemContent[CurrentTabIndex].ListEl.empty();
+  ItemContent[CurrentTabIndex].ListEl.append(await FormatItems(items));
+
+  ItemContent[CurrentTabIndex].NoMoreItems = false;
+  ItemContent[CurrentTabIndex].CurrentItem = null;
+  ItemContent[CurrentTabIndex].Items = items;
+
+  OnItemClick(removeItemEListener);
+  return true;
+};
+
+const FormatItems = async (items) => {
+  let currentitems = "";
+  const adminsettings = AdminSettings || (await FetchAdminSettings());
+  if (!adminsettings) return false;
+
+  const token = Token || sessionStorage.getItem("Token");
+
+  items.forEach((item) => {
+    currentitems += `<div id="vaultitem-${item.id}" class="vault-item card-offset card-offset-hover p-3"><span>${item.isFolder ? "📁" : "📄"} ${
+      item.data?.refE2 ? CryptoJS.AES.decrypt(item.reference, token + adminsettings.keyEnd).toString(CryptoJS.enc.Utf8) : item.reference
+    }</span><span>${new Date(item.updatedAt).toLocaleDateString()}</span></div>`;
+  });
+
+  return currentitems;
+};
+
+const ToggleItemPermissions = (userPermission, item) => {
+  if (userPermission?.role === "Manage") PermissionsButtonEl.show();
+  else PermissionsButtonEl.hide();
+
+  if (item.isEditRestricted && (userPermission?.role !== "Manage" || userPermission?.role !== "Edit")) tinymce.activeEditor.mode.set("readonly");
+  else tinymce.activeEditor.mode.set("design");
 };
 
 const ToggleLoading = () => {
   VaultLoading = !VaultLoading;
-  VaultLoading ? VaultSpinner.css("display", "block") : VaultSpinner.css("display", "none");
+  VaultLoading ? ToggleSiteLoader() : ToggleSiteLoader(false);
 };

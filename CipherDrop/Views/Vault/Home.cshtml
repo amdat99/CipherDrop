@@ -6,9 +6,9 @@
 <link rel="stylesheet" href="~/css/vault.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/tiny.css" asp-append-version="true" />
 <div class="container mt-4">
-<div class="spinner-border text-primary position-fixed" id="vault-spinner" role="status" style=" z-index: 999999; display: none; top: 45%; left: 50%; height: 3rem; width: 3rem;">
+@* <div class="spinner-border text-primary position-fixed" id="vault-spinner" role="status" style=" z-index: 999999; display: none; top: 45%; left: 50%; height: 3rem; width: 3rem;">
     <span class="visually-hidden">Loading...</span>
-</div>
+</div> *@
     <div class="row">
         <div class="col-lg-3">
             <!-- Left Sidebar for Folders -->
@@ -19,7 +19,7 @@
                         <i class="bi bi-folder-plus"></i> Add Folder
                     </button>
                 </div>
-                <input type="text" id="folder-search" class="bg-dark mb-1 text-white form-control border-0 folder-search" placeholder="Search Folders" style="max-height: 33px; align-self: center; width: 90%;">
+                <input type="search" id="root-folder-search" class="bg-dark mb-1 text-white form-control border-0 folder-search" placeholder="Search Folders" style="max-height: 33px; align-self: center; width: 90%;">
                 <div class="vault-folder-list p-3">
                     @foreach (var folder in Model)
                     {
@@ -45,7 +45,7 @@
                 <div class=" d-flex justify-content-between align-items-center p-3">
                     <div id="file-path">Files</div>
                     <div id=folder-actions class="d-flex flex-row" style="display:none">
-                        <input type="text" id="item-search" class="ml-3 mr-3 bg-dark  mb-1 text-white form-control border-0" placeholder="Search..." style="max-height: 33px; max-width: 250px; margin-right: 20px;">
+                        <input type="text" id="vault-item-search" class="ml-3 mr-3 bg-dark  mb-1 text-white form-control border-0" placeholder="Search..." style="max-height: 33px; max-width: 250px; margin-right: 20px;">
                         <div class="dropdown">
                             <button id="vault-add-item" class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-file-earmark-plus"></i> Add Item
@@ -97,7 +97,7 @@
                                     <div id="user-permissions" class="p-3 mt-5 card-offset">
                                         <p class="h5 mb-3">User Permissions</p>
                                         <div class="d-flex justify-content-between">
-                                            <input type="text" id="user-search" class="mr-3 bg-dark mt-1 mb-1 text-white border-0 form-control" placeholder="Find Users" style="max-height: 32px; max-width: 250px;">
+                                            <input type="text" id="user-permissions-search-input" class="mr-3 bg-dark mt-1 mb-1 text-white border-0 form-control" placeholder="Find Users" style="max-height: 32px; max-width: 250px;">
                                             <button id="user-permissions-add-user" class="btn btn-primary btn-sm bg-dark text-white h-fit" style="max-height: 32px;"> Add User </button>
                                         </div>
                                         <table class="table">

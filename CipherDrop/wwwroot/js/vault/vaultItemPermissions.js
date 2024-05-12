@@ -1,14 +1,17 @@
-let permissionsTableBody;
-let currentRole = "View";
+let permissionsTableBodyEl;
 let currentButtonEl;
 let editRestrictionInputEl;
 let viewRestrictionInputEl;
-let firstSet = true;
+let usersFilterInputEl;
 
+let currentRole = "View";
+let firstSet = true;
+let permissionsLoading = false;
 let lastPermissionnsId = 0;
 let permissionsModel = {};
+let userPermissions = [];
 
-$("#permissions-btn").on("click", async function () {
+PermissionsButtonEl.on("click", async function () {
   if (!ItemContent[CurrentTabIndex].CurrentItem) return DisplayToast({ message: "Please select an item to view permissions", type: "danger" });
   lastPermissionnsId = 0;
 
@@ -22,6 +25,7 @@ $("#permissions-btn").on("click", async function () {
 
   const permissions = await fetchPermissions();
   if (!permissions) return DisplayToast({ message: "Failed to fetch permissions", type: "danger" });
+  userPermissions = permissions;
 
   if (VaultItemPemrmissions.is(":visible")) {
     tinymce.activeEditor.show();
@@ -35,6 +39,7 @@ $("#permissions-btn").on("click", async function () {
 
   if (!editRestrictionInputEl) editRestrictionInputEl = $("#IsEditRestricted");
   if (!viewRestrictionInputEl) viewRestrictionInputEl = $("#IsViewRestricted");
+  if (!usersFilterInputEl) usersFilterInputEl = $("#user-permissions-search-input");
 
   editRestrictionInputEl.prop("checked", ItemContent[CurrentTabIndex].CurrentItem.isEditRestricted);
   viewRestrictionInputEl.prop("checked", ItemContent[CurrentTabIndex].CurrentItem.isViewRestricted);
@@ -45,15 +50,15 @@ $("#permissions-btn").on("click", async function () {
 });
 
 const setPermissions = (permissions, reset = false) => {
-  if (!permissionsTableBody) permissionsTableBody = $("#user-permissions-table-body");
+  if (!permissionsTableBodyEl) permissionsTableBodyEl = $("#user-permissions-table-body");
 
   let permissionsHtml = "";
   permissions.forEach((permission) => {
     permissionsHtml += formatPermissionRow(permission);
   });
 
-  if (reset) permissionsTableBody.html(permissionsHtml);
-  else permissionsTableBody.append(permissionsHtml);
+  if (reset) permissionsTableBodyEl.html(permissionsHtml);
+  else permissionsTableBodyEl.append(permissionsHtml);
 };
 
 const formatPermissionRow = (permission) => {
@@ -62,7 +67,7 @@ const formatPermissionRow = (permission) => {
       <td class="text-white">${permission.userName}</td>
     <td>
         <div class="dropdown">
-            <button class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle permission-dropdown-btn " type="button" id="dropdownMenuButton-${
+            <button class="btn btn-primary btn-sm bg-dark text-white dropdown-toggle permission-dropdown-btn " style="min-width:120px" type="button" id="dropdownMenuButton-${
               permission.id
             }" data-bs-toggle="dropdown" aria-expanded="false">
                 Role : ${permission.role}
@@ -90,39 +95,39 @@ const formatPermissionRow = (permission) => {
             </ul>
             <button id="remove-permission-${
               permission.userId
-            }" class="btn btn-primary btn-sm bg-dark text-white remove-user-permission" style="margin-left:20px" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove User">Remove</button>
+            }" class="btn btn-primary btn-sm bg-dark text-white remove-user-permission" style="margin-left:20px;" data-bs-toggle="tooltip" data-bs-placement="top" title="Remove User">Remove</button>
         </div>
     </td>
 </tr>`;
 };
 
 const OnFirstInitSet = () => {
+  //Set Click listeners gor default restrictions
   editRestrictionInputEl.on("change", async function () {
     const currentChecked = $(this).is(":checked");
-    const updateRestictionsReq = await updateRestrictions({ ...permissionsModel, isEditRestricted: currentChecked });
+    const updateRestictionsReq = await updateRestrictions(null, currentChecked);
     if (!updateRestictionsReq.success) return (this.checked = !currentChecked);
-    ItemContent[CurrentTabIndex].CurrentItem.isEditRestricted = currentChecked;
   });
 
   $("#IsViewRestricted").on("change", async function () {
     let currentChecked = $(this).is(":checked");
-    const updateRestictionsReq = await updateRestrictions({ ...permissionsModel, isViewRestricted: currentChecked });
+    const updateRestictionsReq = await updateRestrictions(currentChecked, null);
     if (!updateRestictionsReq.success) return (this.checked = !currentChecked);
-    ItemContent[CurrentTabIndex].CurrentItem.isViewRestricted = currentChecked;
   });
 
+  //Close btn
   $("#close-permissions").on("click", function () {
     VaultItemPemrmissions.hide();
     tinymce.activeEditor.show();
   });
 
+  //Add user to permissions
   $("#user-permissions-add-user").on("click", () => {
     UserModal({
       title: "Add User to Permissions",
       submitText: "Add User",
       roles: ["View", "Edit", "Manage"],
       submitFunction: (user) => {
-        console.log(user);
         if (user.role) {
           //Add user to permissions
           addUserPermission();
@@ -130,7 +135,9 @@ const OnFirstInitSet = () => {
       },
     });
   });
+
   setRowPermissionListeners();
+  userSearchFilter();
 };
 
 const setRowPermissionListeners = () => {
@@ -144,7 +151,6 @@ const setRowPermissionListeners = () => {
   $(".permission-role-btn").on("click", function () {
     const userId = $(this).attr("id").split("-")[2];
     const role = $(this).text().split("-")[0].trim();
-    console.log(role, currentRole);
     if (role === currentRole) return;
     setUserRoles(role, userId);
   });
@@ -155,7 +161,7 @@ const setRowPermissionListeners = () => {
     DisplayModal({
       title: "Remove User Permission",
       content:
-        "<div>Are you sure you want to remove this user from the permissions list? Based on the role and default restrictions the user has, they may lose view and/or edit access to this item.</div>",
+        "<div>Are you sure you want to remove this user from the permissions list? Based on the role the user has and the default restrictions, they may lose view and/or edit access to this item.</div>",
       buttonText: "Remove",
       buttonStyle: "background-color: var(--danger-color); border-color: var(--danger-color);",
       submitFunction: () => {
@@ -165,30 +171,51 @@ const setRowPermissionListeners = () => {
   });
 };
 
+const userSearchFilter = () => {
+  usersFilterInputEl.on("keyup", function () {
+    const filter = $(this).val().toLowerCase();
+    userPermissions.forEach((user) => {
+      const row = $(`#user-permission-row-${user.userId}`);
+      const name = user.userName.toLowerCase();
+      if (name.includes(filter)) row.show();
+      else row.hide();
+    });
+  });
+};
+
 const fetchPermissions = async () => {
   const response = await RequestHandler({ method: "GET", url: `/vaultPermissions/userpermissions/${permissionsModel.id}?lastId=${lastPermissionnsId}` });
   return response?.data;
 };
 
-const updateRestrictions = async (permissions) => {
+const updateRestrictions = async (viewRestriction, editRestriction) => {
+  if (permissionsLoading) return setTimeout(() => updateRestrictions(viewRestriction, editRestriction), 1000);
+  const curPermissions = { ...permissionsModel };
+  viewRestriction ? (curPermissions.isViewRestricted = viewRestriction) : (curPermissions.isEditRestricted = editRestriction);
+
+  permissionsLoading = true;
   const response = await RequestHandler({
     method: "PUT",
     url: "/vaultPermissions/UpdateRestrictions",
-    body: permissions,
+    body: curPermissions,
   });
+  permissionsLoading = false;
   if (!response.success) {
     DisplayToast({ message: "Failed to update Restrictions", type: "danger" });
-    return response;
+  } else {
+    permissionsModel = curPermissions;
   }
+  return response;
 };
 
 const setUserRoles = async (role, userId) => {
+  if (permissionsLoading) return setTimeout(() => setUserRoles(role, userId), 1000);
   const response = await RequestHandler({
     method: "PUT",
     url: "/vaultPermissions/UpdateUserPermissions",
-    body: { role, userId: parseInt(userId), id: permissionsModel.id },
+    body: { role, userId: parseInt(userId), vaultItemId: permissionsModel.id },
   });
-  if (!response.success) return DisplayToast({ message: "Failed to update user role", type: "danger" });
+  if (!response.success) return DisplayToast({ message: response?.message || "Failed to update user role", type: "danger" });
   currentButtonEl.text(`Role : ${role}`);
 };
 
@@ -198,10 +225,13 @@ const addUserPermission = async () => {
     url: "/vaultPermissions/AddPermission",
     body: { vaultItemId: permissionsModel.id, userId: currentUser.id, role: currentUser.role },
   });
-  if (!response.success) return DisplayToast({ message: response.message || "Failed to add user permission", type: "danger" });
+  if (!response.success) return DisplayToast({ message: response?.message || "Failed to add user permission", type: "danger" });
   const permissionRow = formatPermissionRow({ userId: currentUser.id, userName: currentUser.name, role: currentUser.role, id: response.id });
-  permissionsTableBody.append(permissionRow);
+  permissionsTableBodyEl.append(permissionRow);
+  userPermissions.push(permissionRow);
   setRowPermissionListeners();
+  CloseModal();
+  DisplayToast({ message: "User permission added", type: "success" });
 };
 
 const removeUserPermission = async (userId) => {
@@ -210,6 +240,8 @@ const removeUserPermission = async (userId) => {
     url: `/vaultPermissions/RemovePermission`,
     body: { vaultItemId: permissionsModel.id, userId },
   });
-  if (!response.success) return DisplayToast({ message: response.message || "Failed to remove user permission", type: "danger" });
+  if (!response.success) return DisplayToast({ message: response?.message || "Failed to remove user permission", type: "danger" });
   $(`#user-permission-row-${userId}`).remove();
+  CloseModal();
+  DisplayToast({ message: "User permission removed", type: "success" });
 };

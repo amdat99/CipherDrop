@@ -1,10 +1,8 @@
 
 @model CipherDrop.Models.SetupOptions
-
 @{
     ViewData["Title"] = "Setup";
 }
-
 <div class="container mt-5">
     <section class="row">
         <div class="col-md-12">
@@ -19,7 +17,7 @@
               <form asp-controller="Admin" asp-action="Setup" method="post">
                 <div class="mb-3">
                     <label for="Input_Key" class="form-label">Enter a custom phrase for the encryption key or click the button to generate a random text for the key.</label>
-                    <input type="text" class="form-control" id="Input_Key" name="Key" required minlength="10"  value="@Model.Key">
+                    <input type="password" class="form-control" id="Input_Key" name="Key" required minlength="10" value="@Model.Key">
                     <span asp-validation-for="Key" class="text-danger"></span>                    
                 </div>
 
@@ -28,8 +26,17 @@
                 <div class="mb-3">
                     <button type="button" id="generate_key" class="btn btn-primary btn-block">Generate Key</button>
                 </div>   
-                <p>
+                <p class="text-muted">
                     Make sure to save the encryption key as it will be used to locally encrypt & decrypt your data. It will not be stored on the server, so if you lose it, you will lose access to your data.
+                </p>
+                <div class="mb-3 d-flex border-top pt-2">
+                    <input type="checkbox" class="form-check " id="Input_AllowGlobalSearchAndLinking" name="AllowGlobalSearchAndLinking" value="@Model.AllowGlobalSearchAndLinking" checked>     
+                    <label for="Input_AllowGlobalSearchAndLinking" class="pl-5">Enable global search and linking </label>
+                    <span asp-validation-for="AllowGlobalSearchAndLinking" class="text-danger"></span>                    
+                </div>
+                <p class="text-muted">
+                    To allow for global search and linking functionilty the item name, folder name and the cipher reference are encrypted server side only. (All item content and cipher values are always E2E double encrypted) You can disable this feature to allow E2E double encryption 
+                    for the item name, folder name and cipher reference also, however search and linking functionality will be limited.
                 </p>
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-primary btn-block">Setup</button>
@@ -37,7 +44,7 @@
             </form>
             </div>
          </div>
-    </section>
+    </section> 
 </div>
 
 @section Scripts {

@@ -1,4 +1,3 @@
-using System.Xml;
 using CipherDrop.Data;
 using CipherDrop.Models;
 using CipherDrop.Utils;
@@ -23,10 +22,33 @@ namespace CipherDrop.Services;
                             Reference = EncryptionUtils.Decrypt(vf.Reference,null),
                             IsFolder = vf.IsFolder,
                             UserId = vf.UserId,
+                            FolderId = vf.FolderId,
                             UpdatedAt = vf.UpdatedAt
                         })
                         .OrderByDescending(vf => vf.UpdatedAt)
                         .Take(50)];
+        }
+
+        public static List<VaultItem?> GetFilteredVaultItems( CipherDropContext context, string query, int folderId, int userId)
+        {
+            // Get the VaultItem where the Reference contains the query and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId) and decrypt the reference in all rows
+            return [.. context.VaultItem
+                        .Where(vf => vf.Reference.Contains(query) && vf.FolderId == folderId &&
+                                    (!vf.IsViewRestricted ||
+                                    (vf.IsViewRestricted &&
+                                        context.SharedVaultItem.Any(sv => sv.VaultItemId == vf.Id &&
+                                                                        sv.UserId == userId))))
+                        .Select(vf => new VaultItem
+                        {
+                            Id = vf.Id,
+                            Reference = EncryptionUtils.Decrypt(vf.Reference, null),
+                            IsFolder = vf.IsFolder,
+                            UserId = vf.UserId,
+                            FolderId = vf.FolderId,
+                            UpdatedAt = vf.UpdatedAt
+                        })
+                        .OrderByDescending(vf => vf.UpdatedAt)
+                        .Take(40)];
         }
 
         public static VaultItem? GetVaultItem(CipherDropContext context, int id, int userId)
@@ -45,7 +67,7 @@ namespace CipherDrop.Services;
         }
  
         //Make sure to run this in a transaction
-        public static async Task<int> AddItemTransactionAsync(CipherDropContext context, AddItem jsonData, Session? session)
+        public static async Task<int> AddItemTransactionAsync(CipherDropContext context, AddItem jsonData, Session? session, AdminSettings? adminSettings)
         {
             var item = new VaultItem
             {
@@ -53,14 +75,14 @@ namespace CipherDrop.Services;
                 Value = EncryptionUtils.Encrypt(jsonData.Value),
                 FolderId = jsonData.FolderId,
                 IsFolder = jsonData.IsFolder,
-                UserId = session.UserId
+                UserId = session.UserId,
+                RefE2 = adminSettings.AllowGlobalSearchAndLinking != true
             };
 
             if(item.IsFolder == true)
             {
-                int subFolderId = await VaultFolderService.AddFolderAsync(context,jsonData.Reference, false, session);
-                item.RootFolderId = item.FolderId;
-                item.FolderId = subFolderId;
+                int subFolderId = await VaultFolderService.AddFolderAsync(context,jsonData.Reference, false, session, adminSettings);
+                item.SubFolderId = subFolderId;
             }
             context.VaultItem.Add(item);
             await context.SaveChangesAsync();

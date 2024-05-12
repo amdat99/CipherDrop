@@ -30,6 +30,22 @@ public class VaultController(CipherDropContext context) : Controller
         }
     }
 
+    public IActionResult FoldersSearch()
+    {
+        try 
+        {
+            string query = Request.Query["query"].FirstOrDefault() ?? "";
+            string isRoot = Request.Query["isRoot"].FirstOrDefault() ?? "true";
+            var folders = VaultFolderService.GetFilteredFolders(context, query , isRoot == "true");
+            return Json(new { success = true, data = folders });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting folders" });
+        }
+    }
+
     public IActionResult VaultItems(int id)
     {
         try
@@ -44,6 +60,23 @@ public class VaultController(CipherDropContext context) : Controller
             return StatusCode(500, new { success = false, message = "Error getting items" });
         }
     }
+
+    public IActionResult VaultItemsSearch()
+    {
+        try 
+        {
+            string query = Request.Query["query"].FirstOrDefault() ?? "";
+            string folderId = Request.Query["folderId"].FirstOrDefault() ?? throw new Exception("FolderId is required");
+            var items = VaultItemService.GetFilteredVaultItems(context, query, int.Parse(folderId), (HttpContext.Items["Session"] as Session).UserId);
+            return Json(new { success = true, data = items });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error getting folders" });
+        }
+    }
+
 
     public async Task<IActionResult> VaultItem(int id)
     {
@@ -76,11 +109,12 @@ public class VaultController(CipherDropContext context) : Controller
         }
         try 
         {
-            int folderId = await VaultFolderService.AddFolderAsync(context,jsonData.FolderName, true, HttpContext.Items["Session"] as Session); 
+            int folderId = await VaultFolderService.AddFolderAsync(context,jsonData.FolderName, true, HttpContext.Items["Session"] as Session, HttpContext.Items["AdminSettings"] as AdminSettings);
             return Json(new { success = true , id = folderId });
         }
         catch (Exception e)
         {
+            Console.WriteLine(e);
             return StatusCode(500, new { success = false, message = "Error adding folder" });
         }
     }
@@ -96,7 +130,7 @@ public class VaultController(CipherDropContext context) : Controller
         using var transaction = await context.Database.BeginTransactionAsync();
         try 
         {
-            int itemId = await VaultItemService.AddItemTransactionAsync(context, jsonData, HttpContext.Items["Session"] as Session);
+            int itemId = await VaultItemService.AddItemTransactionAsync(context, jsonData, HttpContext.Items["Session"] as Session, HttpContext.Items["AdminSettings"] as AdminSettings );
             await transaction.CommitAsync();
             return Json(new { success = true , id = itemId });
         }
