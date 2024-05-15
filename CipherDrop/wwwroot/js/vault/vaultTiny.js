@@ -1,7 +1,7 @@
 tinymce.init({
   selector: "#file-viewer-content",
   license_key: "gpl",
-  height: $(".file-view").height() - 160 + "px",
+  height: $(".file-view").height() - 140 + "px",
   content_css: "/css/tiny.css",
   promotion: false,
   branding: false,
@@ -31,7 +31,7 @@ tinymce.init({
     // loading_text: '',
     // loading_class: 'mentions-loader',
     insert: function (item) {
-      return '<span class="test" contenteditable="false" style="' + this.options.mentioned_style + '">' + item.name + "</span>&nbsp;";
+      return '<span class="test" id="" contenteditable="false" style="' + this.options.mentioned_style + '">' + item.name + "</span>&nbsp;";
     },
   },
   setup: function (editor) {

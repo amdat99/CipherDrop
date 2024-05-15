@@ -199,10 +199,12 @@ pre[class*="language-"] {
 
 .tox-textfield:focus {
   border-color: var(--primary-color) !important;
+  box-shadow: none !important;
   outline: none !important;
 }
 
 .tox .tox-listboxfield .tox-listbox--selected:focus {
+  box-shadow: none !important;
   background-color: var(--secondary-color) !important;
   color: #fff !important;
 }
@@ -210,6 +212,7 @@ pre[class*="language-"] {
 .tox .tox-textarea:focus {
   border-color: var(--primary-color) !important;
   outline: none !important;
+  box-shadow: none !important;
 }
 
 .tox-label {

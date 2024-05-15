@@ -75,11 +75,15 @@ const addRootFolder = async () => {
   if (request.success) {
     CloseModal();
 
-    VaultFolderList.append(` <div id="root-folder-${request.id}" class="vault-root-folder card-offset-hover card-offset">📁 ${FolderName}</div>`);
+    VaultFolderList.append(
+      ` <div id="root-folder-${request.id}" class="vault-root-folder card-offset-hover card-offset"> <div class="d-flex justify-content-between align-items-center"> <span>📁${FolderName}</span> <img class="folder-sliderdown" id="root-slider-${request.id}" 
+        src="https://www.svgrepo.com/show/80156/down-arrow.svg" style="width: 10px; height: 20px;" /> </div> </div>`
+    );
 
     //remove event listener for folder click first and then add it again with the new folder
     $(".vault-root-folder").off("click");
     OnRootFolderClick();
+    SetFileTreeListeners();
     DisplayToast({ message: "Folder added successfully", type: "success" });
   } else {
     DisplayToast({ message: request?.message || "An error occured", type: "danger" });

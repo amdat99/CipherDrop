@@ -45,7 +45,9 @@ const OnVauleChange = (e) => {
 
 const OnItemClick = (removeEventListenerFirst = false) => {
   if (removeEventListenerFirst) $(".vault-item").off("click");
-  $(".vault-item").on("click", async function () {
+  $(".vault-item").on("click", async function (e) {
+    e.stopPropagation();
+    console.log("clicked", this.id);
     const item = await FetchItem(this.id.split("-")[1]);
     if (!item) return;
     //decrypt item value and set it
@@ -121,6 +123,8 @@ const updateItemReference = async (reference) => {
       .find("span")
       .first()
       .text(`📄 ${reference}`);
+    VaultCurrentTab.html(reference);
+    ItemContent[CurrentTabIndex].TabName = reference;
   } else {
     if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
     else DisplayToast({ message: "An error occured", type: "danger" });

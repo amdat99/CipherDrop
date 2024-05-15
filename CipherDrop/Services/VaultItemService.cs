@@ -23,6 +23,7 @@ namespace CipherDrop.Services;
                             IsFolder = vf.IsFolder,
                             UserId = vf.UserId,
                             FolderId = vf.FolderId,
+                            SubFolderId = vf.SubFolderId,
                             UpdatedAt = vf.UpdatedAt
                         })
                         .OrderByDescending(vf => vf.UpdatedAt)
@@ -45,6 +46,7 @@ namespace CipherDrop.Services;
                             IsFolder = vf.IsFolder,
                             UserId = vf.UserId,
                             FolderId = vf.FolderId,
+                            SubFolderId = vf.SubFolderId,
                             UpdatedAt = vf.UpdatedAt
                         })
                         .OrderByDescending(vf => vf.UpdatedAt)

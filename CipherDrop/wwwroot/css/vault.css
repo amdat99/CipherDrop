@@ -14,14 +14,14 @@
 }
 
 .file-view {
-  min-height: calc(100vh - 140px);
-  max-height: calc(100vh - 140px);
+  min-height: calc(100vh - 110px);
+  max-height: calc(100vh - 110px);
   overflow: auto;
 }
 
 .folder-view {
-  min-height: calc(100vh - 140px);
-  max-height: calc(100vh - 140px);
+  min-height: calc(100vh - 110px);
+  max-height: calc(100vh - 110px);
   overflow: auto;
 }
 
@@ -56,6 +56,9 @@
   .vault-root-folder {
     margin-right: 10px;
     margin-bottom: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   .folder-search {
@@ -71,6 +74,15 @@
 .vault-root-folder:hover {
   background-color: var(--secondary-color);
   transition: background-color 0.3s;
+}
+
+.folder-sliderdown {
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  margin-right: 5px;
+  margin-top: 5px;
+  transition: all 0.3s;
 }
 
 .vault-item {
@@ -103,6 +115,22 @@
   align-items: center;
   margin-left: 10px;
   background-color: var(--secondary-color) !important;
+}
+
+.folder-expanded-items {
+  margin-top: 5px;
+  margin-left: 10px;
+  max-height: 500px !important;
+  overflow-y: auto;
+}
+
+.vault-expanded-item {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 2px;
 }
 
 .vault-tabs .nav-link {

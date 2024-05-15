@@ -22,12 +22,16 @@ html {
   }
 }
 
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--primary-color);
+  box-shadow: 0 0 0 0.05rem var(--primary-color), 0 0 0 0.05rem var(--primary-color) !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus {
+  box-shadow: none !important;
 }
 .nav-link {
   color: #fff !important;

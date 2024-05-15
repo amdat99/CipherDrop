@@ -68,10 +68,11 @@ const OnRootFolderClick = () => {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
     //Change style of selected folder
     CurrentFolder && (CurrentFolder.style = "");
+    console.log(CurrentFolder);
     this.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
-    CurrentFolder = e.target;
+    CurrentFolder = this;
     //Set folder path and and add listener to folder name in path
-    setFilePath(folderId, this.innerText);
+    setFilePath(folderId, this.innerHTML.split("<span>")[1].split("</span>")[0]);
     //fetch folder items and render them if any
     SetItems(folderId);
     //Add id to url
@@ -115,7 +116,7 @@ const formatFilePath = (folderId, text, options) => {
     options?.customHtml ||
     `<a id="vault-${
       options?.isSubFolder ? "subfolder" : "folder"
-    }-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="mt-5">›</span>`;
+    }-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="position-relative" style="top: 5px;">›</span>`;
 
   switch (true) {
     case !!options?.append:
@@ -145,7 +146,7 @@ const formatFilePath = (folderId, text, options) => {
 const onSetItemAterClick = (id, folderId, e) => {
   if (id.startsWith("vault-folder")) {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
-    setFilePath(folderId, e.target.innerText);
+    setFilePath(folderId, e.target.innerText.replace("⬇️", ""));
   } else {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = folderId;
     setFilePath(folderId, e.target.innerText, { removeAfter: true, isSubFolder: true });
@@ -169,7 +170,7 @@ const onSetItemAterClick = (id, folderId, e) => {
     CurrentFolder && (CurrentFolder.style = "");
     folder.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
     CurrentFolder = folder;
-    setFilePath(folderId, folder.innerText);
+    setFilePath(folderId, folder.innerText.replace("⬇️", ""));
   }
 })();
 
