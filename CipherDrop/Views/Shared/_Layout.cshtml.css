@@ -43,3 +43,16 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+.navbar-toggler {
+  background-image: url('data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><path stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"/></svg>');
+  border-color: #141414;
+}
+@media (max-width: 992px) {
+  .navbar-expand-lg .navbar-collapse {
+    color: #fff;
+    padding: 1rem;
+    background-color: #141414;
+    z-index: 10000;
+  }
+}

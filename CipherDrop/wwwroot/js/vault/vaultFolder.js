@@ -68,7 +68,6 @@ const OnRootFolderClick = () => {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
     //Change style of selected folder
     CurrentFolder && (CurrentFolder.style = "");
-    console.log(CurrentFolder);
     this.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
     CurrentFolder = this;
     //Set folder path and and add listener to folder name in path
@@ -97,24 +96,36 @@ OnRootFolderClick();
  */
 const setFilePath = (folderId, text, options) => {
   formatFilePath(folderId, text, options);
+  SetFilePathListeners();
+};
+
+const SetFilePathListeners = () => {
   $(".file-path-item").off("click");
   $(".file-path-item").on("click", function (e) {
     e.preventDefault();
-    const folderId = this.id.split("-")[2];
+    e.stopPropagation();
+    const folderId = this.id.split("-")[1];
+
     showListViwer();
 
     //Check if the folder is already selected if not set items for the folder. Pass true to remove old event listener
     if (ItemContent[CurrentTabIndex].CurrentSubFolderId && ItemContent[CurrentTabIndex].CurrentSubFolderId == folderId) return;
     else if (!ItemContent[CurrentTabIndex].CurrentSubFolderId && ItemContent[CurrentTabIndex].CurrentFolderId == folderId) return;
 
-    onSetItemAterClick(this.id, folderId, e);
+    if (this.dataset?.Rootfolder) {
+      const folderPath = GetFolderPath(this);
+      if (!folderPath || folderPath.length === 0) return;
+      OnSetFileTreeSubItem(folderPath, this.dataset?.Subfolder);
+    } else {
+      onSetItemAterClick(this.id, folderId, e);
+    }
   });
 };
 
 const formatFilePath = (folderId, text, options) => {
   let html =
     options?.customHtml ||
-    `<a id="vault-${
+    `<a id="vault${
       options?.isSubFolder ? "subfolder" : "folder"
     }-${folderId}" class="vault-root-folder file-path-item" "href="/vault/home/${folderId}">${text}</a> <span class="position-relative" style="top: 5px;">›</span>`;
 
@@ -124,7 +135,7 @@ const formatFilePath = (folderId, text, options) => {
       ItemContent[CurrentTabIndex].PathArray.push({ folderId, text });
       break;
     case !!options?.removeAfter:
-      $(`#vault-subfolder-${folderId}`).nextAll().remove();
+      $(`#vaultsubfolder-${folderId}`).nextAll().remove();
       const index = ItemContent[CurrentTabIndex].PathArray.findIndex((x) => x.folderId === folderId);
       ItemContent[CurrentTabIndex].PathArray = ItemContent[CurrentTabIndex].PathArray.slice(0, index + 1);
       break;
@@ -144,7 +155,7 @@ const formatFilePath = (folderId, text, options) => {
 };
 
 const onSetItemAterClick = (id, folderId, e) => {
-  if (id.startsWith("vault-folder")) {
+  if (id.startsWith("vaultfolder")) {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
     setFilePath(folderId, e.target.innerText.replace("⬇️", ""));
   } else {
@@ -152,6 +163,21 @@ const onSetItemAterClick = (id, folderId, e) => {
     setFilePath(folderId, e.target.innerText, { removeAfter: true, isSubFolder: true });
   }
   SetItems(folderId, true);
+};
+
+const OnSetFileTreeSubItem = (folderPath, subFolderId) => {
+  SetItems(subFolderId, true);
+  VaultFilePath.html("");
+  ItemContent[CurrentTabIndex].PathArray = [];
+  if (folderPath.length === 1) {
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
+    ItemContent[CurrentTabIndex].CurrentFolderId = folderPath[0].folderId;
+  } else {
+    ItemContent[CurrentTabIndex].CurrentSubFolderId = subFolderId;
+  }
+  folderPath.forEach((path, index) => {
+    setFilePath(path.folderId, path.reference, { append: true, isSubFolder: index > 0 ? true : false });
+  });
 };
 
 //Check query params and set folder items if query param is present

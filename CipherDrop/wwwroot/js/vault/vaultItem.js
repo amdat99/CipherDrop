@@ -47,7 +47,6 @@ const OnItemClick = (removeEventListenerFirst = false) => {
   if (removeEventListenerFirst) $(".vault-item").off("click");
   $(".vault-item").on("click", async function (e) {
     e.stopPropagation();
-    console.log("clicked", this.id);
     const item = await FetchItem(this.id.split("-")[1]);
     if (!item) return;
     //decrypt item value and set it
@@ -55,6 +54,13 @@ const OnItemClick = (removeEventListenerFirst = false) => {
     //Update current tab text
     ItemContent[CurrentTabIndex].TabName = item.data?.reference || "Item";
     VaultCurrentTab.html(item?.data?.reference || "Item");
+
+    //If clicked from file tree on rootfolders set the folder path for the item and item parents
+    if (this.dataset?.Rootfolder) {
+      const folderPath = GetFolderPath(this);
+      if (!folderPath || folderPath.length === 0) return;
+      OnSetFileTreeSubItem(folderPath, folderPath[folderPath.length - 1].folderId);
+    }
   });
   setCurrentItemListScrollListener();
 };
