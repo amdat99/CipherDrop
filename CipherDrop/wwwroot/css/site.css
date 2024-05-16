@@ -129,6 +129,7 @@ dialog[open] {
   box-shadow: 0 1px 1px 0 var(--card-border-color);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
+  z-index: 0 !important;
 }
 
 .card-offset-hover:hover {

@@ -1,39 +1,46 @@
 const SetFileTreeListeners = () => {
-  $(".folder-sliderdown").off("click");
-  $(".folder-sliderdown").on("click", async function (e) {
-    e.stopPropagation();
-    if (this.style.transform === "rotate(180deg)") {
-      $(`#folder-expanded-${this.id.split("-")[2]}`).remove();
-      return (this.style.transform = "rotate(0deg)");
-    }
+  $(".folder-sliderdown")
+    .off("click")
+    .on("click", async function (e) {
+      e.stopPropagation();
+      // If the folder is already expanded, collapse it
+      if (this.style.transform === "rotate(180deg)") {
+        $(`#folder-expanded-${this.id.split("-")[2]}`).remove();
+        return (this.style.transform = "rotate(0deg)");
+      }
 
-    const isSubFolder = this.id.startsWith("subfolder");
-    const folderId = this.id.split("-")[2];
-    const subfolderId = this.dataset?.Subfolder;
-    const items = await FetchFolderItems(subfolderId || folderId);
-    if (!items) return;
+      const isSubFolder = this.id.startsWith("subfolder");
+      const folderId = this.id.split("-")[2];
+      const subfolderId = this.dataset?.Subfolder;
+      // Fetch the items for the subfolder
+      const items = await FetchFolderItems(subfolderId || folderId);
+      if (!items) return;
 
-    const rootFolderId = this.dataset?.Rootfolder;
-    const folder = isSubFolder ? $("#vault-" + folderId + "-item" + this.id.split("subfolder-slider")[1].split("-")[0]) : $(`#root-folder-${folderId}`);
-    folder.append(formatSubItems(items, folderId, rootFolderId));
-    this.style.transform = "rotate(180deg)";
-    SetFileTreeListeners();
-    SetFilePathListeners();
-    OnItemClick(true);
-  });
+      const rootFolderId = this.dataset?.Rootfolder;
+      const folder = isSubFolder ? $("#vaultsubfolder-" + folderId + "-" + rootFolderId) : $(`#root-folder-${folderId}`);
+      // Append the items to the folder
+      folder.append(formatSubItems(items, folderId, rootFolderId));
+      this.style.transform = "rotate(180deg)";
+
+      // Set the listeners for the new items
+      SetFileTreeListeners();
+      SetFilePathListeners();
+      OnItemClick(true);
+    });
 };
 
+// Run function on load
 SetFileTreeListeners();
 
 const formatSubItems = (items, id, rootFolderId = null) => {
   let itemsHtml = `<div class='folder-expanded-items' id='folder-expanded-${id}'>`;
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const divId = item.isFolder ? `vaultsubfolder-${item.id}-${id}` : `vaultitem-${item.id}-${id}`;
+    const divId = item.isFolder ? `vaultsubfolder-${item.id}-${rootFolderId || id}` : `vaultitem-${item.id}-${id}`;
     itemsHtml += `<div id="${divId}" class="${
       item.isFolder ? "file-path-item" : "vault-item"
     } card-offset-hover vault-expanded-item folder-expandeditem-${id}" data--rootfolder="${rootFolderId || id}" data--subfolder="${item?.subFolderId}">
-        <div class="d-flex justify-content-between align-items-center fleex-direction-row">
+        <div class="d-flex justify-content-between align-items-center flex-direction-row">
           <span>${item.isFolder ? "📁" : "📄"} ${item.reference}</span>
           ${
             item.isFolder

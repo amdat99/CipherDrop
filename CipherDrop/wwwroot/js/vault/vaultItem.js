@@ -43,51 +43,59 @@ const OnVauleChange = (e) => {
   }, 1000);
 };
 
-const OnItemClick = (removeEventListenerFirst = false) => {
-  if (removeEventListenerFirst) $(".vault-item").off("click");
-  $(".vault-item").on("click", async function (e) {
-    e.stopPropagation();
-    const item = await FetchItem(this.id.split("-")[1]);
-    if (!item) return;
-    //decrypt item value and set it
-    SetItem(item, item.data?.isFolder ? true : false);
-    //Update current tab text
-    ItemContent[CurrentTabIndex].TabName = item.data?.reference || "Item";
-    VaultCurrentTab.html(item?.data?.reference || "Item");
+const OnItemClick = () => {
+  $(".vault-item")
+    .off("click")
+    .on("click", async function (e) {
+      e.stopPropagation();
+      const item = await FetchItem(this.id.split("-")[1]);
+      if (!item) return;
+      //decrypt item value and set it
+      SetItem(item, item.data?.isFolder ? true : false);
+      //Update current tab text
+      ItemContent[CurrentTabIndex].TabName = item.data?.reference || "Item";
+      VaultCurrentTab.html(item?.data?.reference || "Item");
 
-    //If clicked from file tree on rootfolders set the folder path for the item and item parents
-    if (this.dataset?.Rootfolder) {
-      const folderPath = GetFolderPath(this);
-      if (!folderPath || folderPath.length === 0) return;
-      OnSetFileTreeSubItem(folderPath, folderPath[folderPath.length - 1].folderId);
-    }
-  });
+      //If clicked from file tree on rootfolders set the folder path for the item and item parents
+      if (this.dataset?.Rootfolder) {
+        const folderPath = GetFolderPath(this);
+        if (!folderPath || folderPath.length === 0) return;
+        OnSetFileTreeSubItem(folderPath, folderPath[folderPath.length - 1].folderId);
+      }
+    });
   setCurrentItemListScrollListener();
 };
 
 const setCurrentItemListScrollListener = () => {
-  ItemContent[CurrentTabIndex].ListEl.off("scroll");
-  ItemContent[CurrentTabIndex].ListEl.on("scroll", function () {
-    if (itemScrollTimeout) clearTimeout(itemScrollTimeout);
-    itemScrollTimeout = setTimeout(async () => {
-      if (
-        this.scrollTop + this.clientHeight >= this.scrollHeight - 30 &&
-        ItemContent[CurrentTabIndex].Items.length > 40 &&
-        !ItemContent[CurrentTabIndex].NoMoreItems
-      ) {
-        const lastItem = $(".vault-item").last()[0];
-        if (!lastItem) return;
-        ItemContent[CurrentTabIndex].LastId = lastItem.id.split("-")[1];
-        const items = await FetchFolderItems(ItemContent[CurrentTabIndex].CurrentSubFolderId || ItemContent[CurrentTabIndex].CurrentFolderId);
-        if (!items) return;
-        else if (items.length === 0) return (ItemContent[CurrentTabIndex].NoMoreItems = true);
+  if (itemScrollTimeout) clearTimeout(itemScrollTimeout);
 
-        ItemContent[CurrentTabIndex].ListEl.append(await FormatItems(items));
-        ItemContent[CurrentTabIndex].Items = [...ItemContent[CurrentTabIndex].Items, ...items];
-        OnItemClick(true);
-      }
-    }, 100);
-  });
+  itemScrollTimeout = setTimeout(async () => {
+    if (shouldLoadMoreItems(this, ItemContent[CurrentTabIndex])) {
+      const items = await fetchMoreItems(ItemContent[CurrentTabIndex]);
+      if (!items || items.length === 0) return (ItemContent[CurrentTabIndex].NoMoreItems = true);
+
+      //append items to the list and set the click listener if items
+      appendAndFormatItems(currentTab, items);
+      OnItemClick(true);
+    }
+  }, 100);
+
+  const shouldLoadMoreItems = (listEl, currentTab) => {
+    return listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 30 && currentTab.Items.length > 40 && !currentTab.NoMoreItems;
+  };
+};
+
+const fetchMoreItems = async (currentTab) => {
+  const lastItem = $(".vault-item").last()[0];
+  if (!lastItem) return;
+
+  currentTab.LastId = lastItem.id.split("-")[1];
+  return await FetchFolderItems(currentTab.CurrentSubFolderId || currentTab.CurrentFolderId);
+};
+
+const appendAndFormatItems = async (currentTab, items) => {
+  currentTab.ListEl.append(await FormatItems(items));
+  currentTab.Items = [...currentTab.Items, ...items];
 };
 
 const updateItem = async (value) => {
@@ -103,9 +111,7 @@ const updateItem = async (value) => {
   const request = await RequestHandler({ url: `/vault/updateitem/${ItemContent[CurrentTabIndex].CurrentItem.id}`, method: "PUT", body: tempItem });
   loading = false;
   if (request.success) {
-    ItemContent[CurrentTabIndex].CurrentItem = tempItem;
-    ItemContent[CurrentTabIndex].CurrentItem.value = value;
-    ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
+    setItemAfterSuccess(tempItem, value);
   } else {
     if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
     else DisplayToast({ message: "An error occured", type: "danger" });
@@ -122,19 +128,31 @@ const updateItemReference = async (reference) => {
   const request = await RequestHandler({ url: `/vault/UpdateItemReference/`, method: "PUT", body: { ...tempItem, value: "" } });
   loading = false;
   if (request.success) {
-    ItemContent[CurrentTabIndex].CurrentItem = tempItem;
-    ItemContent[CurrentTabIndex].CurrentItem.reference = reference;
-    ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
-    $("#vaultitem-" + ItemContent[CurrentTabIndex].CurrentItem.id)
-      .find("span")
-      .first()
-      .text(`📄 ${reference}`);
-    VaultCurrentTab.html(reference);
-    ItemContent[CurrentTabIndex].TabName = reference;
+    setItemAfterSuccess(tempItem, reference, "reference");
   } else {
     if (request.errors) request.errors.forEach((error) => DisplayToast({ message: error, type: "danger" }));
     else DisplayToast({ message: "An error occured", type: "danger" });
   }
+};
+
+const setItemAfterSuccess = (tempItem, text, type = "value") => {
+  ItemContent[CurrentTabIndex].CurrentItem = tempItem;
+  ItemContent[CurrentTabIndex].CurrentItem.reference = reference;
+  ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
+
+  if (type === "value") {
+    ItemContent[CurrentTabIndex].CurrentItem.value = text;
+  } else {
+    ItemContent[CurrentTabIndex].CurrentItem.reference = text;
+
+    $("#vaultitem-" + ItemContent[CurrentTabIndex].CurrentItem.id)
+      .find("span")
+      .first()
+      .text(`📄 ${reference}`);
+  }
+
+  VaultCurrentTab.html(text);
+  ItemContent[CurrentTabIndex].TabName = text;
 };
 
 const filterItems = async (searchTerm) => {

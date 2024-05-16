@@ -145,10 +145,14 @@ namespace CipherDrop.Services;
         await ActivityService.AddActivityAsync("Vault", jsonData.Id, "Update item", jsonData.IsFolder ? "Folder" : "Item", session, context);
     }   
     
-    public static async Task DeleteItem(CipherDropContext context, int id, Session? session)
+    public static async Task DeleteItemAsync(CipherDropContext context, int id, Session? session)
     {
+        //Check if user has manage permissions
+        var sharedVaultItem = context.SharedVaultItem.Where(svi => svi.VaultItemId == id && svi.UserId == session.UserId && svi.Role == "Manage").FirstOrDefault();
+        if(sharedVaultItem == null)  throw new Exception("User does not have permission to delete this item");
+       
         var item = context.VaultItem.Where(vi => vi.Id == id).FirstOrDefault();
-        if(item == null) return;
+        if(item == null) throw new Exception("Item not found");
         context.VaultItem.Remove(item);
         await ActivityService.AddActivityAsync("Vault", item.Id, "Delete item", item.IsFolder ? "Folder" : "Item", session , context);
     }

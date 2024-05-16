@@ -177,6 +177,23 @@ public class VaultController(CipherDropContext context) : Controller
             return StatusCode(500, new { success = false, message = "Error updating item" });
         }
     }
+
+    [HttpDelete]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteItem(int id)
+    {
+        try 
+        {
+            await VaultItemService.DeleteItemAsync(context, id, HttpContext.Items["Session"] as Session);
+            return Json(new { success = true });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return StatusCode(500, new { success = false, message = "Error deleting item" });
+        }
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

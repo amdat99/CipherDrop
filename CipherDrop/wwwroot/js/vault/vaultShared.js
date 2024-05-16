@@ -8,6 +8,7 @@ const VaultAddSubFolderBtn = $("#add-sub-folder");
 const VaultFilePath = $("#file-path");
 const VaultItemPemrmissions = $("#item-permissions");
 const PermissionsButtonEl = $("#permissions-btn");
+const DeleteItemButtonEl = $("#delete-item");
 
 let VaultCurrentTab = $("#tab-link-0");
 
@@ -45,7 +46,6 @@ const FetchFolderItems = async (folderId, reset = true) => {
     return null;
   }
 };
-
 /**
  *
  * @param {int} id
@@ -105,6 +105,21 @@ const AddItem = async (folderId, isFolder = false) => {
   CloseModal();
 };
 
+const DeleteItem = async () => {
+  if (!ItemContent[CurrentTabIndex].CurrentItem) return DisplayToast({ message: "Please select an item to delete", type: "danger" });
+  const request = await RequestHandler({ url: `/vault/deleteitem/${ItemContent[CurrentTabIndex].CurrentItem.id}`, method: "DELETE" });
+  if (request.success) {
+    $(`#vaultitem-${ItemContent[CurrentTabIndex].CurrentItem.id}`).remove();
+    ItemContent[CurrentTabIndex].CurrentItem = null;
+    ItemContent[CurrentTabIndex].ListEl.show();
+    VaultFileViewer.hide();
+    CloseModal();
+    DisplayToast({ message: "Item deleted successfully", type: "success" });
+  } else {
+    DisplayToast({ message: "An error occured", type: "danger" });
+  }
+};
+
 /**
  *  Set item to the file viewer
  * @param {*} item
@@ -128,17 +143,13 @@ const SetItem = async (item, isSubfolder = false) => {
     tinymce.get("file-viewer-content").setContent(item.data.value);
 
     ItemContent[CurrentTabIndex].ListEl.hide();
-    VaultFileViewer.show();
-    if (VaultItemPemrmissions.is(":visible")) {
-      VaultItemPemrmissions.hide();
-      tinymce.activeEditor.show();
-    }
   } else {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = item.data.subFolderId;
-    if (await SetItems(item.data.subFolderId, true)) setFilePath(item.data.subFolderId, item.data.reference, { append: true, isSubFolder: true });
+    if (await SetItems(item.data.subFolderId, true)) SetFilePath(item.data.subFolderId, item.data.reference, { append: true, isSubFolder: true });
   }
 
   //show or hide permissions button and set readonly mode based on user permission and default restrictions
+  showItem();
   ToggleItemPermissions(item?.userPermission, item.data);
 };
 
@@ -184,4 +195,12 @@ const ToggleItemPermissions = (userPermission, item) => {
 const ToggleLoading = () => {
   VaultLoading = !VaultLoading;
   VaultLoading ? ToggleSiteLoader() : ToggleSiteLoader(false);
+};
+
+const showItem = () => {
+  VaultFileViewer.show();
+  if (VaultItemPemrmissions.is(":visible")) {
+    VaultItemPemrmissions.hide();
+    tinymce.activeEditor.show();
+  }
 };

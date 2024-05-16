@@ -12,8 +12,7 @@ $("#addRootFolder").on("click", function () {
 });
 
 // Add add default item handler
-VaultAddItemBtn.off("click");
-VaultAddItemBtn.on("click", function () {
+VaultAddItemBtn.off("click").on("click", function () {
   if (!ItemContent[CurrentTabIndex].CurrentFolderId) return DisplayToast({ message: "Please select a folder to add item to", type: "danger" });
   DisplayModal({
     content: `
@@ -28,8 +27,7 @@ VaultAddItemBtn.on("click", function () {
 });
 
 //Add add subfolder handler
-VaultAddSubFolderBtn.off("click");
-VaultAddSubFolderBtn.on("click", function () {
+VaultAddSubFolderBtn.off("click").on("click", function () {
   if (!ItemContent[CurrentTabIndex].CurrentFolderId) return DisplayToast({ message: "Please select a folder to add subfolder to", type: "danger" });
   DisplayModal({
     content: `
@@ -43,6 +41,16 @@ VaultAddSubFolderBtn.on("click", function () {
   });
 });
 
+DeleteItemButtonEl.off("click").on("click", async function () {
+  if (!ItemContent[CurrentTabIndex].CurrentItem) return DisplayToast({ message: "Please select an item to delete", type: "danger" });
+  DisplayModal({
+    content: "Are you sure you want to delete this item?",
+    buttonText: "Delete",
+    buttonStyle: "background-color: var(--danger-color); border-color: var(--danger-color);",
+    submitFunction: DeleteItem,
+  });
+});
+
 $("#tab-add-item").on("click", function () {
   const id = Math.random().toString().replace(".", "");
   const newFileList = $(`<div id="vault-file-list-${id}"></div>`);
@@ -51,6 +59,21 @@ $("#tab-add-item").on("click", function () {
   $("#tab-add-item").before(`<span class="nav-link vault-tab active " id="tab-link-${id}">Items</span>`);
   VaultFileListContainer.append(newFileList);
 
+  //Reset active styles on current tab
+  resetActiveStyles(CurrentLinkId);
+
+  //Set new tab as current tab
+  CurrentTabIndex = ItemContent.length - 1;
+  TabIndexMap[id] = CurrentTabIndex;
+  CurrentLinkId = id;
+  VaultCurrentTab = $(`#tab-link-${id}`);
+
+  //Show the item list view and set listeners for the new tab
+  showListViwer();
+  setTabLinkOnClick();
+});
+
+const resetActiveStyles = (CurrentLinkId) => {
   //Hide the current tab and remove active clas from current tab
   $(`#tab-link-${CurrentLinkId}`).removeClass("active");
   ItemContent[CurrentTabIndex].ListEl.hide();
@@ -58,15 +81,7 @@ $("#tab-add-item").on("click", function () {
   //Reset active styles on root folder for current tab and reset file path
   $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`).removeAttr("style");
   VaultFilePath.html("");
-
-  CurrentTabIndex = ItemContent.length - 1;
-  TabIndexMap[id] = CurrentTabIndex;
-  CurrentLinkId = id;
-
-  VaultCurrentTab = $(`#tab-link-${id}`);
-  showListViwer();
-  setTabLinkOnClick();
-});
+};
 
 const addRootFolder = async () => {
   const FolderName = $("#folderName").val();
@@ -91,59 +106,79 @@ const addRootFolder = async () => {
 };
 
 const setTabLinkOnClick = () => {
-  $(".vault-tab").off("click");
-  $(".vault-tab").on("click", async function (e) {
-    const id = e.target.id.split("-")[2];
-    if (CurrentLinkId === id) return;
-    //Hide the current tab and remove active clas from current tab
-    $(`#tab-link-${CurrentLinkId}`).removeClass("active");
-    ItemContent[CurrentTabIndex].ListEl.hide();
-    $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`).removeAttr("style");
+  $(".vault-tab")
+    .off("click")
+    .on("click", async (e) => {
+      e.stopPropagation();
+      const id = this.attr("id").split("-")[2];
+      if (CurrentLinkId === id) return;
 
-    CurrentTabIndex = TabIndexMap[id];
-    CurrentLinkId = id;
-    const curFolderId = ItemContent[CurrentTabIndex].CurrentFolderId;
+      const currentTabIndex = TabIndexMap[id];
+      const currentTabContent = ItemContent[currentTabIndex];
 
-    //set active styles and path
-    $(`#tab-link-${id}`).addClass("active");
-    const currentFolder = $(`#root-folder-${curFolderId}`);
-    currentFolder.css("background-color", "var(--secondary-color)").css("border", "1px solid var(--primary-color)");
+      hideCurrentTab(currentTabContent);
+      updateCurrentTab(id);
 
-    VaultFilePath.html("");
-    let pathContent = "";
-    ItemContent[CurrentTabIndex].PathArray.forEach((path, index) => {
-      pathContent += `<a id="vault-${index == 0 ? "folder" : "subfolder"}-${path.folderId}" class="vault-root-folder file-path-item" href="/vault/home/${
-        path.folderId
-      }">${path.text}</a> <span class="mt-5">›</span>`;
+      renderPathContent(currentTabContent);
+      handleSelectedItem(currentTabContent);
     });
+};
 
-    setFilePath(ItemContent[CurrentTabIndex].CurrentSubFolderId || ItemContent[CurrentTabIndex].CurrentSubFolderId, "", {
-      customHtml: pathContent,
-      reset: true,
-    });
+const hideCurrentTab = (currentTabContent) => {
+  $(`#tab-link-${CurrentLinkId}`).removeClass("active");
+  currentTabContent.ListEl.hide();
+  $(`#root-folder-${currentTabContent.CurrentFolderId}`).removeAttr("style");
+};
 
-    VaultCurrentTab = $(`#tab-link-${CurrentLinkId}`);
-    //Check if a item is selected and show if so
-    if (ItemContent[CurrentTabIndex].CurrentItem) {
-      const { CurrentItem } = ItemContent[CurrentTabIndex];
-      //Set the prefetched item or fetch it again and reformat it
-      CurrentItem.reference
-        ? (tinymce.get("file-viewer-content").setContent(CurrentItem.value),
-          fileViewerReference.text(CurrentItem.reference),
-          fileViewerReference.val(CurrentItem.reference))
-        : await FetchItem(CurrentItem.id).then((item) => SetItem(item?.data));
+const updateCurrentTab = (id) => {
+  CurrentTabIndex = TabIndexMap[id];
+  CurrentLinkId = id;
 
-      ToggleItemPermissions(ItemContent[CurrentTabIndex]?.UserPermission, CurrentItem);
-      VaultFileViewer.show();
-
-      if (VaultItemPemrmissions.is(":visible")) {
-        VaultItemPemrmissions.hide();
-        tinymce.activeEditor.show();
-      }
-    } else {
-      ItemContent[CurrentTabIndex].ListEl.show();
-      VaultFileViewer.hide();
-      VaultCurrentTab.html(ItemContent[CurrentTabIndex].TabName);
-    }
+  $(`#tab-link-${id}`).addClass("active");
+  const $currentFolder = $(`#root-folder-${ItemContent[CurrentTabIndex].CurrentFolderId}`);
+  $currentFolder.css({
+    "background-color": "var(--secondary-color)",
+    border: "1px solid var(--primary-color)",
   });
+};
+
+const renderPathContent = (currentTabContent) => {
+  let pathContent = "";
+  currentTabContent.PathArray.forEach((path, index) => {
+    pathContent += `<a id="vault-${index == 0 ? "folder" : "subfolder"}-${path.folderId}" class="vault-root-folder file-path-item" href="/vault/home/${
+      path.folderId
+    }">${path.text}</a> <span class="mt-5">›</span>`;
+  });
+
+  setFilePath(currentTabContent.CurrentSubFolderId || currentTabContent.CurrentSubFolderId, "", {
+    customHtml: pathContent,
+    reset: true,
+  });
+};
+
+const handleSelectedItem = async (currentTabContent) => {
+  if (currentTabContent.CurrentItem) {
+    const { CurrentItem } = currentTabContent;
+
+    if (CurrentItem.reference) {
+      tinymce.get("file-viewer-content").setContent(CurrentItem.value);
+      fileViewerReference.text(CurrentItem.reference);
+      fileViewerReference.val(CurrentItem.reference);
+    } else {
+      const item = await FetchItem(CurrentItem.id);
+      SetItem(item?.data);
+    }
+
+    ToggleItemPermissions(currentTabContent.UserPermission, CurrentItem);
+    VaultFileViewer.show();
+
+    if (VaultItemPemrmissions.is(":visible")) {
+      VaultItemPemrmissions.hide();
+      tinymce.activeEditor.show();
+    }
+  } else {
+    currentTabContent.ListEl.show();
+    VaultFileViewer.hide();
+    $(`#tab-link-${CurrentLinkId}`).html(currentTabContent.TabName);
+  }
 };

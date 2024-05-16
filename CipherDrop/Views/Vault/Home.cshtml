@@ -79,13 +79,19 @@
                         </div>
                         <textarea id="file-viewer-content"  placeholder=""></textarea>
                         <div id="item-permissions" style="display:none" class="mt-4 mx-3">
-                            <div class="d-flex justify-content-between align-items-center">
+                            @* <div class="d-flex justify-content-between align-items-center">
                                 <span></span>
                                 <button id="close-permissions" class="btn btn-primary btn-sm bg-dark text-white">X</button>
-                            </div>
+                            </div> *@
                             <div class="tab-content " style="margin-top: 25px;">
                                 <div class="tab-pane show active" id="vault-permissions" role="tabpanel" aria-labelledby="view-tab">
-                                    <div class="p-3 card-offset">
+                                <div id="user-item-actions" class="p-3  card-offset">
+                                        <p class="h5 mb-3">Actions</p>
+                                        <div class="d-flex justify-content-between">
+                                            <button id="delete-item" class="btn btn-primary btn-sm bg-dark text-white h-fit" style="max-height: 32px;"> Delete Item </button>
+                                        </div>
+                                    </div>
+                                    <div class="p-3 card-offset mt-5">
                                         <p id="permissions-title" class="h5 mb-3">Default Restrictions</p>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
@@ -141,6 +147,7 @@
     <script src="~/js/vault/vaultTiny.js" asp-append-version="true"></script>    
     <script src="~/js/vault/vaultShared.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultItem.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vaultFilePath.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultFolder.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultFileTree.js" asp-append-version="true"></script>
     <script src="~/js/vault/vaultActions.js" asp-append-version="true"></script>
@@ -150,6 +157,7 @@
         }, 0);
         InitialiseTooltips();
     </script>       
-     <script src="~/js/vault/vaultItemPermissions.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vaultitemPermissionUtils.js" asp-append-version="true"></script>
+    <script src="~/js/vault/vaultItemPermissions.js" asp-append-version="true"></script>
     <script src="~/js/userModal.js" asp-append-version="true"></script>
 }
