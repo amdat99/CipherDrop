@@ -40,7 +40,9 @@ const SetFilePathListeners = () => {
     } else {
       onSetItemAterClick(this.id, folderId, e);
     }
+    UpdateLocalTabState();
   });
+  UpdateLocalTabState();
 };
 
 const formatFilePath = (folderId, text, options) => {
@@ -91,6 +93,7 @@ const onSetItemAterClick = (id, folderId, e) => {
 const OnSetFileTreeSubItem = (folderPath, subFolderId) => {
   VaultFilePath.html("");
   ItemContent[CurrentTabIndex].PathArray = [];
+  if (folderPath.length === 0) return;
   if (folderPath.length === 1) {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = null;
     ItemContent[CurrentTabIndex].CurrentFolderId = folderPath[0].folderId;
@@ -98,7 +101,7 @@ const OnSetFileTreeSubItem = (folderPath, subFolderId) => {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = subFolderId;
   }
   folderPath.forEach((path, index) => {
-    SetFilePath(path.folderId, path.reference, { append: true, isSubFolder: index > 0 ? true : false });
+    SetFilePath(path.folderId, path.text || path.reference, { append: true, isSubFolder: index > 0 ? true : false });
   });
 
   CurrentFolder && (CurrentFolder.style = "");

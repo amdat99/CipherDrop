@@ -55,10 +55,10 @@ const fetchPermissions = async () => {
   return response?.data;
 };
 
-const updateRestrictions = async (viewRestriction, editRestriction) => {
+const updateRestrictions = async (viewRestriction = null, editRestriction = null) => {
   if (permissionsLoading) return setTimeout(() => updateRestrictions(viewRestriction, editRestriction), 1000);
   const curPermissions = { ...permissionsModel };
-  viewRestriction ? (curPermissions.isViewRestricted = viewRestriction) : (curPermissions.isEditRestricted = editRestriction);
+  viewRestriction !== null ? (curPermissions.isViewRestricted = viewRestriction) : (curPermissions.isEditRestricted = editRestriction);
 
   permissionsLoading = true;
   const response = await RequestHandler({

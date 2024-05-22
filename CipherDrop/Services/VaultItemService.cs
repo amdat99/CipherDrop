@@ -30,28 +30,36 @@ namespace CipherDrop.Services;
                         .Take(50)];
         }
 
-        public static List<VaultItem?> GetFilteredVaultItems( CipherDropContext context, string query, int folderId, int userId)
+        public static List<VaultItem?> GetFilteredVaultItems(CipherDropContext context, string query, int folderId, int userId)
         {
-            // Get the VaultItem where the Reference contains the query and (IsViewRestricted is false or IsViewRestricted is true and the userId joined with SharedVaultItemView is equal to the userId) and decrypt the reference in all rows
-            return [.. context.VaultItem
-                        .Where(vf => vf.Reference.Contains(query) && vf.FolderId == folderId &&
-                                    (!vf.IsViewRestricted ||
-                                    (vf.IsViewRestricted &&
-                                        context.SharedVaultItem.Any(sv => sv.VaultItemId == vf.Id &&
-                                                                        sv.UserId == userId))))
-                        .Select(vf => new VaultItem
-                        {
-                            Id = vf.Id,
-                            Reference = EncryptionUtils.Decrypt(vf.Reference, null),
-                            IsFolder = vf.IsFolder,
-                            UserId = vf.UserId,
-                            FolderId = vf.FolderId,
-                            SubFolderId = vf.SubFolderId,
-                            UpdatedAt = vf.UpdatedAt
-                        })
-                        .OrderByDescending(vf => vf.UpdatedAt)
-                        .Take(40)];
+            // Fetch the items from the database without decrypting
+            var vaultItems = context.VaultItem
+                                    .Where(vf => vf.FolderId == folderId &&
+                                                (!vf.IsViewRestricted || 
+                                                (vf.IsViewRestricted && 
+                                                context.SharedVaultItem.Any(sv => sv.VaultItemId == vf.Id && sv.UserId == userId))))
+                                    .ToList();
+
+            // Decrypt the references and filter in-memory
+            var filteredItems = vaultItems
+                                .Where(vf => EncryptionUtils.Decrypt(vf.Reference, null).Contains(query, StringComparison.CurrentCultureIgnoreCase))
+                                .Select(vf => new VaultItem
+                                {
+                                    Id = vf.Id,
+                                    Reference = EncryptionUtils.Decrypt(vf.Reference, null),
+                                    IsFolder = vf.IsFolder,
+                                    UserId = vf.UserId,
+                                    FolderId = vf.FolderId,
+                                    SubFolderId = vf.SubFolderId,
+                                    UpdatedAt = vf.UpdatedAt
+                                })
+                                .OrderByDescending(vf => vf.UpdatedAt)
+                                .Take(40)
+                                .ToList();
+
+            return filteredItems;
         }
+
 
         public static VaultItem? GetVaultItem(CipherDropContext context, int id, int userId)
         {

@@ -10,8 +10,32 @@ public class DashboardController(CipherDropContext context) : Controller
 {    
     public IActionResult Index()
     {
-        var activity = ActivityService.GetPaginatedUserActivity(context, 1, 10);
-        return View(activity);
+        var session = HttpContext.Items["Session"] as Session;
+        if(session.Role == "Admin")
+        {
+            TempData["ActivityTitle"] = "All Activity";
+            return View(ActivityService.GetPaginatedActivity(context, 0));
+        }
+        TempData["ActivityTitle"] = "Your Activity";
+        return View(ActivityService.GetPaginatedUserActivity(context, session.UserId, 0));
+    }
+
+    public IActionResult GetActivity(int lastId)
+    {
+        try
+        {
+            var session = HttpContext.Items["Session"] as Session;
+            if(session.Role == "Admin")
+            {
+                return Json(new { success = true, data = ActivityService.GetPaginatedActivity(context, lastId) });
+            }
+            return Json(new { success = true, data = ActivityService.GetPaginatedUserActivity(context, session.UserId, lastId) });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return StatusCode(500, new { success = false, message = "Error getting activity" });
+        }
     }
 
     public IActionResult Send()

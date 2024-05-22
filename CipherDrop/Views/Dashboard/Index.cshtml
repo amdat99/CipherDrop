@@ -43,12 +43,13 @@
     </section>
 
     <section class="row">
-        <h2 class="mt-5">Recent Activity</h2>
+        <h2 class="mt-5">@TempData["ActivityTitle"]</h2>
         <div class="col-md-12">
             <div class="card-offset mt-4 p-3">
-                <table class="text-white table rounded">
+                <table class="text-white table rounded" id="activity-table">
                     <thead>
                         <tr>
+                            <th scope="col">Id</th>
                             <th scope="col">User</th>
                             <th scope="col">Area</th>
                             <th scope="col">Action</th>                  
@@ -61,6 +62,7 @@
                         @foreach (var item in Model)
                         {
                             <tr>
+                                <td>@item.Id</td>
                                 <td>@item.UserName</td>
                                 <td>@item.Area</td>
                                 <td>@item.Action</td>                        
@@ -82,13 +84,50 @@
         CheckAuth({ email: "@TempData["Email"]", role: "@TempData["Role"]", name: "@TempData["Name"]" });
     </script>
     <script>
-    const name = localStorage.getItem("name");
-    const role = localStorage.getItem("role");
-    if(name != null && role != null){
-        $("#dashboard-title").text("Welcome Back, " + name);
-    }
-    else{
-        window.location.href = "/Login";
-    }
+        const name = localStorage.getItem("name");
+        const role = localStorage.getItem("role");
+        if(name != null && role != null){
+            $("#dashboard-title").text("Welcome Back, " + name);
+        } else {
+            window.location.href = "/Login";
+        }
+
+        const activityTableBody = $("#activity-table tbody");
+        let activityScrollTimeout = null;
+        let noMoreActivityData = false;
+        let activityLoading = false;
+
+        window.addEventListener("scroll", function(){
+            // Load more activity data when the user scrolls to the bottom and more than 30 items are displayed
+            if (window.scrollY + window.innerHeight >= document.body.scrollHeight && !noMoreActivityData && activityTableBody.find("tr").length >= 30) {
+                if (activityScrollTimeout) clearTimeout(activityScrollTimeout);
+
+                activityScrollTimeout = setTimeout(async function() {
+                    const lastId = activityTableBody.find("tr:last-child td:first-child").text();
+                    if (activityLoading || lastId === "") return;
+                    activityLoading = true;
+                    const response = await RequestHandler({ url: "/Dashboard/GetActivity/" + lastId, method: "GET" });
+                    activityLoading = false;
+                    if (!response.success) return;
+                    if (response.data.length === 0) {
+                        noMoreActivityData = true;
+                        return;
+                    }
+                    
+                    let activityDataHtml = response.data.map(activity => `
+                        <tr>
+                            <td>${activity.id}</td>
+                            <td>${activity.userName}</td>
+                            <td>${activity.area}</td>
+                            <td>${activity.action}</td>
+                            <td>${new Date(activity.createdAt).toLocaleString()}</td>
+                            <td>${activity.type}</td>
+                        </tr>`).join('');
+
+                    activityTableBody.append(activityDataHtml);
+                }, 100);
+            }
+        });
     </script>
+
 }

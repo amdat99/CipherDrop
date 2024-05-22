@@ -21,7 +21,7 @@ public class VaultItem
     public string Reference { get; set; } = "";
 
     [Required]
-    [MaxLength(500000)]
+    [MaxLength(1000000 , ErrorMessage = "Item content is too long")]
     public string Value { get; set; } = "";
     public bool IsFolder { get; set; } = false; 
 

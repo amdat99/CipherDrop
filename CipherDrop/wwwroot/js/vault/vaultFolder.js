@@ -90,24 +90,6 @@ const OnRootFolderClick = () => {
 //Run the function on load
 OnRootFolderClick();
 
-//Check query params and set folder items if query param is present
-(async () => {
-  const url = new URL(window.location.href);
-  const lastParam = url.pathname.split("/").pop();
-
-  if (lastParam === "home") return;
-  const folderId = lastParam;
-  ItemContent[CurrentTabIndex].CurrentFolderId = folderId;
-
-  if ((await SetItems(folderId)) === false) return;
-  //Check current folder and set path
-  const folder = document.getElementById(`root-folder-${folderId}`);
-  if (folder) {
-    setCurrentFolder(folder);
-    SetFilePath(folderId, folder.innerText.replace("⬇️", ""));
-  }
-})();
-
 const setCurrentFolder = (folder) => {
   CurrentFolder && (CurrentFolder.style = "");
   folder.style = "background-color: var(--secondary-color); border : 1px solid var(--primary-color);";
@@ -122,5 +104,27 @@ const showListViwer = () => {
   if (VaultItemPemrmissions.is(":visible")) {
     VaultItemPemrmissions.hide();
     tinymce.activeEditor.show();
+  }
+};
+
+const AddRootFolder = async () => {
+  const FolderName = $("#folderName").val();
+  if (!FolderName) return;
+  const request = await RequestHandler({ url: "/vault/addrootfolder", method: "POST", body: { FolderName } });
+  if (request.success) {
+    CloseModal();
+
+    VaultFolderList.append(
+      ` <div id="root-folder-${request.id}" class="vault-root-folder card-offset-hover card-offset"> <div class="d-flex justify-content-between align-items-center"> <span>📁${FolderName}</span> <img class="folder-sliderdown" id="root-slider-${request.id}" 
+        src="https://www.svgrepo.com/show/80156/down-arrow.svg" style="width: 10px; height: 20px;" /> </div> </div>`
+    );
+
+    //remove event listener for folder click first and then add it again with the new folder
+    $(".vault-root-folder").off("click");
+    OnRootFolderClick();
+    SetFileTreeListeners();
+    DisplayToast({ message: "Folder added successfully", type: "success" });
+  } else {
+    DisplayToast({ message: request?.message || "An error occured", type: "danger" });
   }
 };

@@ -10,6 +10,7 @@
   --card-color: #202020; /* Darker color for card background */
   --card-offset-color: #2c2c2c82;
   --card-border-color: #0d0d0d; /* Darker color for card border */
+  --vault-bottom-margin: 100px;
 }
 
 html {

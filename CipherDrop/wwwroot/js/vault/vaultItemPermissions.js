@@ -91,10 +91,10 @@ const OnFirstInitSet = () => {
     if (!updateRestictionsReq.success) return (this.checked = !currentChecked);
   });
 
-  $("#IsViewRestricted").on("change", async function () {
+  viewRestrictionInputEl.on("change", async function () {
     let currentChecked = $(this).is(":checked");
-    const updateRestictionsReq = await updateRestrictions(currentChecked, null);
-    if (!updateRestictionsReq.success) return (this.checked = !currentChecked);
+    const viewRestrictionsReq = await updateRestrictions(currentChecked, null);
+    if (!viewRestrictionsReq.success) return (this.checked = !currentChecked);
   });
 
   //Close btn

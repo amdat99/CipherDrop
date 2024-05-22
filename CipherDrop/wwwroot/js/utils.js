@@ -119,8 +119,9 @@ const CloseModal = () => {
  * Display a toast message
  * @param {string} message - The message to display
  * @param {'success' | 'danger' | 'warning' | 'info'} type - The type of toast to display
+ * @param {boolean} [noTimeout] - Whether to remove the toast after a timeout
  */
-const DisplayToast = ({ message, type }) => {
+const DisplayToast = ({ message, type, noTimeout = false }) => {
   if (!toastContainer) toastContainer = document.querySelector(".toast-container");
   const toast = document.createElement("div");
   toast.classList.add("toast", `bg-${type}`, "text-white");
@@ -137,10 +138,13 @@ const DisplayToast = ({ message, type }) => {
   new bootstrap.Toast(toast).show();
   setTimeout(
     () => {
+      if (noTimeout || !toast) return;
       toast.remove();
     },
     type === "danger" ? 5000 : 3000
   );
+
+  return toast;
 };
 
 const InitialiseTooltips = () => {

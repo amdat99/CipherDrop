@@ -14,8 +14,19 @@ let VaultCurrentTab = $("#tab-link-0");
 
 //Shared vars
 let ItemContent = [
-  { id: 0, Items: [], CurrentItem: null, ListEl: $("#vault-file-list-0"), CurrentFolderId: 0, CurrentSubFolderId: null, LastId: 0, TabName: "Items" },
+  {
+    id: 0,
+    Items: [],
+    CurrentItem: null,
+    ListEl: $("#vault-file-list-0"),
+    CurrentFolderId: 0,
+    CurrentSubFolderId: null,
+    LastId: 0,
+    TabName: "Items",
+    InitialLoad: true,
+  },
 ];
+
 const TabIndexMap = { 0: 0 };
 let CurrentTabIndex = 0;
 let CurrentLinkId = 0;
@@ -105,6 +116,28 @@ const AddItem = async (folderId, isFolder = false) => {
   CloseModal();
 };
 
+const addRootFolder = async () => {
+  const FolderName = $("#folderName").val();
+  if (!FolderName) return;
+  const request = await RequestHandler({ url: "/vault/addrootfolder", method: "POST", body: { FolderName } });
+  if (request.success) {
+    CloseModal();
+
+    VaultFolderList.append(
+      ` <div id="root-folder-${request.id}" class="vault-root-folder card-offset-hover card-offset"> <div class="d-flex justify-content-between align-items-center"> <span>📁${FolderName}</span> <img class="folder-sliderdown" id="root-slider-${request.id}" 
+        src="https://www.svgrepo.com/show/80156/down-arrow.svg" style="width: 10px; height: 20px;" /> </div> </div>`
+    );
+
+    //remove event listener for folder click first and then add it again with the new folder
+    $(".vault-root-folder").off("click");
+    OnRootFolderClick();
+    SetFileTreeListeners();
+    DisplayToast({ message: "Folder added successfully", type: "success" });
+  } else {
+    DisplayToast({ message: request?.message || "An error occured", type: "danger" });
+  }
+};
+
 const DeleteItem = async () => {
   if (!ItemContent[CurrentTabIndex].CurrentItem) return DisplayToast({ message: "Please select an item to delete", type: "danger" });
   const request = await RequestHandler({ url: `/vault/deleteitem/${ItemContent[CurrentTabIndex].CurrentItem.id}`, method: "DELETE" });
@@ -141,15 +174,14 @@ const SetItem = async (item, isSubfolder = false) => {
     fileViewerReference.val(item.data.reference);
     fileViewerReference.text(item.data.reference);
     tinymce.get("file-viewer-content").setContent(item.data.value);
-
     ItemContent[CurrentTabIndex].ListEl.hide();
+    showItem();
   } else {
     ItemContent[CurrentTabIndex].CurrentSubFolderId = item.data.subFolderId;
     if (await SetItems(item.data.subFolderId, true)) SetFilePath(item.data.subFolderId, item.data.reference, { append: true, isSubFolder: true });
   }
 
   //show or hide permissions button and set readonly mode based on user permission and default restrictions
-  showItem();
   ToggleItemPermissions(item?.userPermission, item.data);
 };
 
@@ -188,13 +220,28 @@ const ToggleItemPermissions = (userPermission, item) => {
   if (userPermission?.role === "Manage") PermissionsButtonEl.show();
   else PermissionsButtonEl.hide();
 
-  if (item.isEditRestricted && (userPermission?.role !== "Manage" || userPermission?.role !== "Edit")) tinymce.activeEditor.mode.set("readonly");
+  if (item.isEditRestricted && (!userPermission?.role || userPermission?.role === "View")) tinymce.activeEditor.mode.set("readonly");
   else tinymce.activeEditor.mode.set("design");
 };
 
 const ToggleLoading = () => {
   VaultLoading = !VaultLoading;
   VaultLoading ? ToggleSiteLoader() : ToggleSiteLoader(false);
+};
+
+const UpdateLocalTabState = () => {
+  let storedTabs = localStorage.getItem("VaultTabs");
+  storedTabs ? (storedTabs = JSON.parse(storedTabs)) : (storedTabs = []);
+  storedTabs[CurrentTabIndex] = {
+    Id: CurrentTabIndex,
+    CurrentFolderId: ItemContent[CurrentTabIndex].CurrentFolderId,
+    CurrentSubFolderId: ItemContent[CurrentTabIndex].CurrentSubFolderId,
+    LastId: ItemContent[CurrentTabIndex].LastId,
+    TabName: ItemContent[CurrentTabIndex].TabName,
+    PathArray: ItemContent[CurrentTabIndex].PathArray,
+  };
+  localStorage.setItem("VaultTabs", JSON.stringify(storedTabs));
+  localStorage.setItem("VaultCurrentTab", CurrentTabIndex);
 };
 
 const showItem = () => {

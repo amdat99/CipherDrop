@@ -18,7 +18,7 @@ vaultItemSearch.on("input", function () {
   if (itemSearchTimeout) clearTimeout(itemSearchTimeout);
   itemSearchTimeout = setTimeout(async () => {
     const items = await filterItems(this.value);
-    if (!items?.data || !items.data.length) return DisplayToast({ message: "No items found", type: "info" });
+    //if (!items?.data || !items.data.length) return DisplayToast({ message: "No items found", type: "info" });
 
     ItemContent[CurrentTabIndex].ListEl.empty();
     ItemContent[CurrentTabIndex].ListEl.append(await FormatItems(items.data));
@@ -137,7 +137,6 @@ const updateItemReference = async (reference) => {
 
 const setItemAfterSuccess = (tempItem, text, type = "value") => {
   ItemContent[CurrentTabIndex].CurrentItem = tempItem;
-  ItemContent[CurrentTabIndex].CurrentItem.reference = reference;
   ItemContent[CurrentTabIndex].CurrentItem.updatedAt = new Date();
 
   if (type === "value") {
